@@ -49,7 +49,7 @@ export function PostCard({
           alt={title}
           width={400}
           height={250}
-          className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       </Link>
@@ -97,7 +97,7 @@ export function PostCard({
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.5 text-orange-600" />
-            <span className="text-orange-600 font-medium">{views.toLocaleString()}</span>
+            <span className="text-orange-600 font-medium">{views.toLocaleString('en-US')}</span>
           </div>
         </div>
 

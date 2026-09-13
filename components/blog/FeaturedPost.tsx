@@ -71,20 +71,6 @@ export function FeaturedPost({
             {/* Excerpt */}
             <p className="mb-6 text-base text-[#666666] dark:text-[#94a3b8]">{excerpt}</p>
 
-            {/* Author */}
-            <div className="mb-6 flex items-center gap-3">
-              <Image
-                src={author.avatar}
-                alt={author.name}
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full"
-              />
-              <div>
-                <p className="font-semibold text-[#1a1a1a] dark:text-[#f1f5f9]">{author.name}</p>
-                <p className="text-xs text-[#666666] dark:text-[#94a3b8]">Founder & Writer</p>
-              </div>
-            </div>
 
             {/* Meta & CTA */}
             <div className="flex flex-wrap items-center gap-4">

@@ -59,8 +59,9 @@ export default function BlogPage() {
   // Remaining posts for grid
   const gridPosts = filteredPosts.length > 1 ? filteredPosts.slice(1) : [];
 
-  // Popular posts (top 5 by views)
-  const popularPosts = MOCK_BLOG_POSTS.sort((a, b) => b.views - a.views)
+  // Popular posts (top 5 by views) — copy first so we never mutate shared mock data
+  const popularPosts = [...MOCK_BLOG_POSTS]
+    .sort((a, b) => b.views - a.views)
     .slice(0, 5)
     .map((post) => ({
       id: post.id,
@@ -119,12 +120,12 @@ export default function BlogPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_240px]">
           {/* Main Content Area */}
-          <div className="lg:col-span-2">
+          <div className="min-w-0">
             {/* Posts Grid */}
             {gridPosts.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
                 {gridPosts.map((post, index) => (
                   <PostCard key={post.id} {...post} index={index} />
                 ))}
@@ -157,7 +158,7 @@ export default function BlogPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="lg:col-span-1">
+          <aside className="w-full lg:w-[240px]">
             {/* Search Box */}
             <SearchBox onSearch={setSearchQuery} />
 

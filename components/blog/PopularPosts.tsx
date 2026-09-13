@@ -34,7 +34,7 @@ export function PopularPosts({ posts }: PopularPostsProps) {
             <div className="mt-2 flex items-center gap-2 text-xs text-[#666666] dark:text-[#94a3b8]">
               <Eye className="h-3 w-3 text-orange-600" />
               <span className="bg-orange-600/20 text-orange-600 rounded px-2 py-0.5 font-medium">
-                {post.views.toLocaleString()} views
+                {post.views.toLocaleString('en-US')} views
               </span>
             </div>
           </Link>
