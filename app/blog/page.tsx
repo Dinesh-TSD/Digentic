@@ -5,38 +5,10 @@ import { motion } from 'framer-motion';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { FeaturedPost } from '@/components/blog/FeaturedPost';
 import { PostCard } from '@/components/blog/PostCard';
-import { SearchBox } from '@/components/blog/SearchBox';
-import { PopularPosts } from '@/components/blog/PopularPosts';
-import { TagsCloud } from '@/components/blog/TagsCloud';
-import { AdSenseSlot } from '@/components/blog/AdSenseSlot';
-import { AffiliateLinks } from '@/components/blog/AffiliateLinks';
+import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { MOCK_BLOG_POSTS } from '@/lib/constants';
 
 const CATEGORIES = ['All', 'AI & LLM', 'MERN Stack', 'React / Next.js', 'AI Agents', 'Dev Tools', 'Career & Jobs'];
-
-const AFFILIATE_PRODUCTS = [
-  {
-    id: '1',
-    name: 'OpenAI API',
-    description: 'Access powerful GPT models for your applications',
-    link: 'https://openai.com/api/',
-    icon: '🤖',
-  },
-  {
-    id: '2',
-    name: 'Vercel Hosting',
-    description: 'Deploy Next.js apps in seconds with Vercel',
-    link: 'https://vercel.com',
-    icon: '⚡',
-  },
-  {
-    id: '3',
-    name: 'MongoDB Atlas',
-    description: 'Cloud database for modern applications',
-    link: 'https://www.mongodb.com/cloud/atlas',
-    icon: '🍃',
-  },
-];
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -138,22 +110,13 @@ export default function BlogPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="w-full lg:w-[240px]">
-            {/* Search Box */}
-            <SearchBox onSearch={setSearchQuery} />
-
-            {/* Popular Posts */}
-            <PopularPosts posts={popularPosts} />
-
-            {/* Tags Cloud */}
-            <TagsCloud tags={allTags} onTagClick={setSelectedCategory} />
-
-            {/* AdSense Slot */}
-            <AdSenseSlot />
-
-            {/* Affiliate Links */}
-            <AffiliateLinks products={AFFILIATE_PRODUCTS} />
-          </aside>
+          <BlogSidebar
+            onSearch={setSearchQuery}
+            onTagClick={setSelectedCategory}
+            selectedTag={selectedCategory !== 'All' ? selectedCategory : undefined}
+            tags={allTags}
+            popularPosts={popularPosts}
+          />
         </div>
       </div>
     </div>
