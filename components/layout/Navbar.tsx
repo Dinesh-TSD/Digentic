@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Hexagon } from 'lucide-react';
+import { Menu, X, Hexagon, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggle } from './ThemeToggle';
 import { NAV_LINKS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -12,7 +13,10 @@ import { cn } from '@/lib/utils';
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -22,7 +26,21 @@ export function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
+    setUserDropdownOpen(false);
   }, [pathname]);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const user = session?.user;
 
   return (
     <header
@@ -72,12 +90,80 @@ export function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Link
-            href="/auth/login"
-            className="hidden rounded-lg border border-orange-600 px-4 py-2 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-600/10 sm:inline-flex"
-          >
-            Login
-          </Link>
+
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-2 rounded-full border border-orange-600/30 bg-orange-600/10 p-1 pr-3 text-sm font-medium text-[var(--text-primary)] hover:border-orange-600 transition-colors"
+                aria-label="User menu"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] text-xs font-bold text-white">
+                  {user.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.image}
+                      alt={user.name || 'User'}
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'
+                  )}
+                </div>
+                <span className="hidden max-w-[100px] truncate text-xs font-semibold sm:inline-block">
+                  {user.name || user.email?.split('@')[0]}
+                </span>
+              </button>
+
+              <AnimatePresence>
+                {userDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-56 rounded-xl border border-[#e0e0e0] dark:border-[#262626] bg-white dark:bg-[#141414] p-2 shadow-xl z-50"
+                  >
+                    <div className="px-3 py-2 border-b border-[#e0e0e0] dark:border-[#262626] mb-1">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {user.name || 'User'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-500/10 hover:text-[#ff8c00] transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        signOut({ callbackUrl: '/' });
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors mt-1"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="hidden sm:inline-flex items-center justify-center rounded-lg bg-[#ff8c00] hover:bg-[#ff6b35] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-orange-500/20 transition-all hover:shadow-orange-500/30"
+            >
+              Login
+            </Link>
+          )}
 
           {/* Mobile menu button */}
           <button
@@ -115,12 +201,30 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/auth/login"
-                className="mt-2 rounded-lg border border-orange-600 px-4 py-3 text-center text-sm font-semibold text-orange-600"
-              >
-                Login
-              </Link>
+
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="mt-2 rounded-lg bg-orange-600/10 px-4 py-3 text-sm font-semibold text-orange-600"
+                  >
+                    Dashboard ({user.name || user.email})
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="rounded-lg border border-red-500/30 px-4 py-3 text-center text-sm font-semibold text-red-500 hover:bg-red-500/10"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="mt-2 block rounded-lg bg-[#ff8c00] hover:bg-[#ff6b35] px-4 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

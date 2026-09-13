@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { AuthSessionProvider } from '@/components/providers/SessionProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
@@ -31,13 +32,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          <Navbar />
-          <main className="min-h-screen bg-[var(--bg-base)] pt-16">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
+        <AuthSessionProvider>
+          <ThemeProvider>
+            <Navbar />
+            <main className="min-h-screen bg-[var(--bg-base)] pt-16">
+              {children}
+            </main>
+            <Footer />
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );
