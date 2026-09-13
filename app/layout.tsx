@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'DIGENTIC TECH — The DNA of AI Technology | Dinesh T',
   description:
     'DIGENTIC TECH by Dinesh T — AI Engineer and MERN Developer. Courses, digital assets, and insights on AI engineering, LangChain, and full-stack development.',

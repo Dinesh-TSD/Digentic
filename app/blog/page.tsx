@@ -1,118 +1,180 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, Search } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
 import { SectionHeader } from '@/components/shared/SectionHeader';
+import { FeaturedPost } from '@/components/blog/FeaturedPost';
+import { PostCard } from '@/components/blog/PostCard';
+import { SearchBox } from '@/components/blog/SearchBox';
+import { PopularPosts } from '@/components/blog/PopularPosts';
+import { TagsCloud } from '@/components/blog/TagsCloud';
+import { AdSenseSlot } from '@/components/blog/AdSenseSlot';
+import { AffiliateLinks } from '@/components/blog/AffiliateLinks';
 import { MOCK_BLOG_POSTS } from '@/lib/constants';
 
-const CATEGORIES = ['All', 'AI & ML', 'Web Dev', 'DevOps'];
+const CATEGORIES = ['All', 'AI & LLM', 'MERN Stack', 'React / Next.js', 'AI Agents', 'Dev Tools', 'Career & Jobs'];
+
+const AFFILIATE_PRODUCTS = [
+  {
+    id: '1',
+    name: 'OpenAI API',
+    description: 'Access powerful GPT models for your applications',
+    link: 'https://openai.com/api/',
+    icon: '🤖',
+  },
+  {
+    id: '2',
+    name: 'Vercel Hosting',
+    description: 'Deploy Next.js apps in seconds with Vercel',
+    link: 'https://vercel.com',
+    icon: '⚡',
+  },
+  {
+    id: '3',
+    name: 'MongoDB Atlas',
+    description: 'Cloud database for modern applications',
+    link: 'https://www.mongodb.com/cloud/atlas',
+    icon: '🍃',
+  },
+];
 
 export default function BlogPage() {
-  const [category, setCategory] = useState('All');
-  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = MOCK_BLOG_POSTS.filter((p) => {
-    const matchCat = category === 'All' || p.category === category;
-    const matchSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.excerpt.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  // Filter posts
+  const filteredPosts = useMemo(() => {
+    return MOCK_BLOG_POSTS.filter((post) => {
+      const matchCategory = selectedCategory === 'All' || post.category === selectedCategory;
+      const matchSearch =
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCategory && matchSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
+  // Featured post (first post)
+  const featuredPost = filteredPosts.length > 0 ? filteredPosts[0] : MOCK_BLOG_POSTS[0];
+
+  // Remaining posts for grid
+  const gridPosts = filteredPosts.length > 1 ? filteredPosts.slice(1) : [];
+
+  // Popular posts (top 5 by views)
+  const popularPosts = MOCK_BLOG_POSTS.sort((a, b) => b.views - a.views)
+    .slice(0, 5)
+    .map((post) => ({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      views: post.views,
+    }));
+
+  // Get all unique tags
+  const allTags = Array.from(new Set(MOCK_BLOG_POSTS.map((post) => post.category)));
 
   return (
-    <div className="py-12">
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          badge="Blog"
-          title="All Articles"
-          subtitle="Deep dives into AI engineering, web development, and building digital products."
-        />
+    <div className="bg-white dark:bg-[#0a0a0a]">
+      {/* Hero Section */}
+      <section className="border-b border-[#e0e0e0] dark:border-[#1f1f1f] py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            badge="Blog"
+            title="All Articles"
+            subtitle="Deep dives into AI engineering, web development, and building digital products."
+          />
+        </div>
+      </section>
 
-        {/* Filters */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((cat) => (
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Featured Post */}
+        {filteredPosts.length > 0 && (
+          <FeaturedPost
+            title={featuredPost.title}
+            excerpt={featuredPost.excerpt}
+            category={featuredPost.category}
+            image={featuredPost.image}
+            author={featuredPost.author}
+            publishDate={featuredPost.publishDate}
+            readTime={featuredPost.readTime}
+            slug={featuredPost.slug}
+          />
+        )}
+
+        {/* Category Filter Bar */}
+        <div className="mb-8 overflow-x-auto">
+          <div className="flex gap-2 pb-2">
+            {CATEGORIES.map((category) => (
               <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  category === cat
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                  selectedCategory === category
                     ? 'bg-orange-gradient text-white'
-                    : 'border border-border bg-[var(--bg-surface)] text-muted-foreground hover:border-orange-600 hover:text-orange-600'
+                    : 'border border-[#e0e0e0] bg-white text-[#1a1a1a] hover:border-orange-600 hover:text-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f] dark:text-[#f1f5f9] dark:hover:border-orange-600 dark:hover:text-orange-500'
                 }`}
               >
-                {cat}
+                {category}
               </button>
             ))}
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search articles..."
-              className="h-10 w-full rounded-lg border border-border bg-[var(--bg-surface)] pl-10 pr-4 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-orange-600 sm:w-64"
-            />
-          </div>
         </div>
 
-        {/* Posts Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((post, i) => (
-            <motion.article
-              key={post.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-              className="card-hover group overflow-hidden rounded-xl border border-border bg-[var(--bg-surface)]"
-            >
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <span className="absolute left-3 top-3 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white">
-                  {post.category}
-                </span>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Main Content Area */}
+          <div className="lg:col-span-2">
+            {/* Posts Grid */}
+            {gridPosts.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {gridPosts.map((post, index) => (
+                  <PostCard key={post.id} {...post} index={index} />
+                ))}
               </div>
-              <div className="p-5">
-                <h3 className="text-base font-bold text-[var(--text-primary)] transition-colors group-hover:text-orange-600">
-                  {post.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                  {post.excerpt}
-                </p>
-                <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {new Date(post.date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
-                    {post.readTime}
-                  </span>
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-lg border border-[#e0e0e0] bg-white p-8 text-center dark:bg-[#111111] dark:border-[#1f1f1f]"
+              >
+                <p className="text-lg font-semibold text-[#1a1a1a] dark:text-[#f1f5f9]">🔍 No posts found</p>
+                <p className="mt-2 text-[#666666] dark:text-[#94a3b8]">Try adjusting your filters or search query</p>
+              </motion.div>
+            )}
 
-        {filtered.length === 0 && (
-          <div className="py-20 text-center text-muted-foreground">
-            No articles found. Try a different search or category.
+            {/* Pagination (simplified) */}
+            {gridPosts.length > 0 && (
+              <div className="mt-8 flex justify-center gap-2">
+                <button className="rounded-lg bg-orange-gradient px-4 py-2 text-sm font-semibold text-white">
+                  1
+                </button>
+                <button className="rounded-lg border border-[#e0e0e0] bg-white px-4 py-2 text-sm font-semibold text-[#1a1a1a] hover:border-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f] dark:text-[#f1f5f9] dark:hover:border-orange-600">
+                  2
+                </button>
+                <button className="rounded-lg border border-[#e0e0e0] bg-white px-4 py-2 text-sm font-semibold text-[#1a1a1a] hover:border-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f] dark:text-[#f1f5f9] dark:hover:border-orange-600">
+                  3
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </section>
+
+          {/* Sidebar */}
+          <aside className="lg:col-span-1">
+            {/* Search Box */}
+            <SearchBox onSearch={setSearchQuery} />
+
+            {/* Popular Posts */}
+            <PopularPosts posts={popularPosts} />
+
+            {/* Tags Cloud */}
+            <TagsCloud tags={allTags} onTagClick={setSelectedCategory} />
+
+            {/* AdSense Slot */}
+            <AdSenseSlot />
+
+            {/* Affiliate Links */}
+            <AffiliateLinks products={AFFILIATE_PRODUCTS} />
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }
