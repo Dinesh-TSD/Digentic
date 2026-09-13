@@ -19,18 +19,57 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google' || account?.provider === 'github') {
+        if (!user?.email) {
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
+      const tempAdminEmail = (
+        process.env.TEMP_ADMIN_EMAIL || 'admin@digentic.tech'
+      )
+        .toLowerCase()
+        .trim();
+
       if (user) {
-        token.id = user.id ? String(user.id) : undefined;
-        token.role = (user as any).role ? String((user as any).role) : 'user';
-        token.enrolledCourses = Array.isArray((user as any).enrolledCourses)
+        token.id = user.id
+          ? String(user.id)
+          : (user as any)._id
+          ? String((user as any)._id)
+          : token.id;
+
+        const isTempAdmin =
+          user.email?.toLowerCase().trim() === tempAdminEmail;
+
+        token.role = isTempAdmin
+          ? 'admin'
+          : (user as any).role
+          ? String((user as any).role)
+          : token.role || 'user';
+
+        token.enrolledCourses = isTempAdmin
+          ? ['all']
+          : Array.isArray((user as any).enrolledCourses)
           ? Array.from((user as any).enrolledCourses).map((c) => String(c))
-          : [];
-        token.purchasedDigital = Array.isArray((user as any).purchasedDigital)
+          : token.enrolledCourses || [];
+
+        token.purchasedDigital = isTempAdmin
+          ? ['all']
+          : Array.isArray((user as any).purchasedDigital)
           ? Array.from((user as any).purchasedDigital).map((d) => String(d))
-          : [];
+          : token.purchasedDigital || [];
+
+        if (user.image) {
+          token.picture = user.image;
+        }
       }
       if (trigger === 'update' && session) {
+        if (session.role) {
+          token.role = String(session.role);
+        }
         if (session.enrolledCourses) {
           token.enrolledCourses = Array.isArray(session.enrolledCourses)
             ? Array.from(session.enrolledCourses).map((c) => String(c))

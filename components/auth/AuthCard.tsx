@@ -24,6 +24,36 @@ interface AuthCardProps {
   initialMode?: 'login' | 'register';
 }
 
+function getAuthErrorMessage(error: string | null): string {
+  if (!error) return '';
+  switch (error) {
+    case 'CredentialsSignin':
+      return 'Invalid email or password. Please try again.';
+    case 'OAuthSignin':
+      return 'Could not initialize social sign-in. Please try again.';
+    case 'OAuthCallback':
+      return 'Error occurred during social authentication callback. Please try again.';
+    case 'OAuthCreateAccount':
+      return 'Could not create an account with this social provider.';
+    case 'EmailCreateAccount':
+      return 'Could not create account with this email.';
+    case 'Callback':
+      return 'Authentication callback failed. Please check your provider settings.';
+    case 'OAuthAccountNotLinked':
+      return 'An account with this email already exists. Sign in with your original method to link them.';
+    case 'EmailSignin':
+      return 'Check your email for the sign-in link.';
+    case 'SessionRequired':
+      return 'Please sign in to access this page.';
+    case 'AccessDenied':
+      return 'Sign in was cancelled or access was denied.';
+    case 'Configuration':
+      return 'OAuth provider is not properly configured. Check CLIENT_ID and CLIENT_SECRET in your environment.';
+    default:
+      return 'An authentication error occurred. Please try again.';
+  }
+}
+
 export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,10 +73,14 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
   // UI states
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState(
-    errorParam === 'CredentialsSignin' ? 'Invalid email or password.' : ''
-  );
+  const [errorMessage, setErrorMessage] = useState(getAuthErrorMessage(errorParam));
   const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (errorParam) {
+      setErrorMessage(getAuthErrorMessage(errorParam));
+    }
+  }, [errorParam]);
 
   // Sync mode with URL if changed
   const switchMode = (newMode: 'login' | 'register') => {
@@ -145,9 +179,18 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
     }
   };
 
-  const handleOAuthSignIn = (provider: 'google' | 'github') => {
-    setSocialLoading(provider);
-    signIn(provider, { callbackUrl });
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    try {
+      setErrorMessage('');
+      setSocialLoading(provider);
+      await signIn(provider, { callbackUrl });
+    } catch (err) {
+      console.error(`Error during ${provider} sign in:`, err);
+      setErrorMessage(
+        `Could not initiate ${provider === 'google' ? 'Google' : 'GitHub'} sign-in. Please try again.`
+      );
+      setSocialLoading(null);
+    }
   };
 
   return (

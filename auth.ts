@@ -82,4 +82,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      try {
+        if (!user.email) return;
+        await connectToDatabase();
+        const tempAdminEmail = (
+          process.env.TEMP_ADMIN_EMAIL || 'admin@digentic.tech'
+        )
+          .toLowerCase()
+          .trim();
+        const isAdmin = user.email.toLowerCase().trim() === tempAdminEmail;
+
+        const existing = await User.findOne({
+          email: user.email.toLowerCase().trim(),
+        });
+
+        if (existing) {
+          let needsSave = false;
+          if (!existing.role) {
+            existing.role = isAdmin ? 'admin' : 'user';
+            needsSave = true;
+          }
+          if (!Array.isArray(existing.enrolledCourses) || existing.enrolledCourses.length === 0) {
+            if (isAdmin) {
+              existing.enrolledCourses = ['all'];
+              needsSave = true;
+            }
+          }
+          if (!Array.isArray(existing.purchasedDigital) || existing.purchasedDigital.length === 0) {
+            if (isAdmin) {
+              existing.purchasedDigital = ['all'];
+              needsSave = true;
+            }
+          }
+          if (needsSave) {
+            await existing.save();
+          }
+        }
+      } catch (error) {
+        console.error('Error synchronizing user on createUser event:', error);
+      }
+    },
+    async linkAccount({ user, account }) {
+      console.log(`[NextAuth] Account ${account.provider} linked to user ${user.email}`);
+    },
+  },
 });
+
