@@ -1,8 +1,9 @@
 import NextAuth from 'next-auth';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import clientPromise, { getDatabase } from '@/lib/mongodb';
+import clientPromise from '@/lib/mongodb';
+import connectToDatabase from '@/lib/mongoose';
+import { User } from '@/models/User';
 import { authConfig } from './auth.config';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -26,7 +27,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials.password as string;
 
         // Temporary Admin Login for development and testing
-        const tempAdminEmail = (process.env.TEMP_ADMIN_EMAIL || 'admin@digentic.tech').toLowerCase().trim();
+        const tempAdminEmail = (
+          process.env.TEMP_ADMIN_EMAIL || 'admin@digentic.tech'
+        )
+          .toLowerCase()
+          .trim();
         const tempAdminPassword = process.env.TEMP_ADMIN_PASSWORD || 'admin123';
 
         if (email === tempAdminEmail && password === tempAdminPassword) {
@@ -42,29 +47,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          const db = await getDatabase();
-          const user = await db.collection('users').findOne({ email });
+          await connectToDatabase();
+          const user = await User.findOne({ email });
 
           if (!user || !user.password) {
             return null;
           }
 
-          const isValid = await bcrypt.compare(password, user.password);
+          const isValid = await user.comparePassword(password);
           if (!isValid) {
             return null;
           }
 
+          const enrolledCourses: string[] = Array.isArray(user.enrolledCourses)
+            ? Array.from(user.enrolledCourses).map((c) => String(c))
+            : [];
+          const purchasedDigital: string[] = Array.isArray(user.purchasedDigital)
+            ? Array.from(user.purchasedDigital).map((d) => String(d))
+            : [];
+
           return {
             id: user._id.toString(),
-            name: user.name || user.email?.split('@')[0],
-            email: user.email,
-            image: user.image || null,
-            role: user.role || 'user',
-            enrolledCourses: user.enrolledCourses || [],
-            purchasedDigital: user.purchasedDigital || [],
+            name: String(user.name || user.email.split('@')[0]),
+            email: String(user.email),
+            image: user.image ? String(user.image) : null,
+            role: String(user.role || 'user'),
+            enrolledCourses,
+            purchasedDigital,
           };
         } catch (error) {
-          console.error('Error authorizing credentials user:', error);
+          console.error('Error authorizing credentials user with Mongoose:', error);
           return null;
         }
       },

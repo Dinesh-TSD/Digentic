@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDatabase } from '@/lib/mongodb';
+import connectToDatabase from '@/lib/mongoose';
+import { User } from '@/models/User';
 
 export async function POST(req: Request) {
   try {
@@ -29,10 +30,9 @@ export async function POST(req: Request) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const db = await getDatabase();
-    const users = db.collection('users');
+    await connectToDatabase();
 
-    const existingUser = await users.findOne({ email: normalizedEmail });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return NextResponse.json(
         { error: 'An account with this email already exists.' },
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newUser = {
+    const newUser = await User.create({
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
@@ -50,21 +50,23 @@ export async function POST(req: Request) {
       role: 'user',
       enrolledCourses: [],
       purchasedDigital: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await users.insertOne(newUser);
+    });
 
     return NextResponse.json(
       {
         success: true,
         message: 'Account created successfully! You can now log in.',
+        user: {
+          id: newUser._id.toString(),
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+        },
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('Error in register route:', error);
+    console.error('Error in Mongoose register route:', error);
     return NextResponse.json(
       { error: error?.message || 'Something went wrong during registration.' },
       { status: 500 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getDatabase } from '@/lib/mongodb';
+import connectToDatabase from '@/lib/mongoose';
+import { User } from '@/models/User';
+import { PasswordReset } from '@/models/PasswordReset';
 import { sendPasswordResetEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
@@ -15,13 +17,11 @@ export async function POST(req: Request) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const db = await getDatabase();
-    const users = db.collection('users');
-    const passwordResets = db.collection('password_resets');
+    await connectToDatabase();
 
-    const user = await users.findOne({ email: normalizedEmail });
+    const user = await User.findOne({ email: normalizedEmail });
 
-    // Always respond with a generic success message to prevent user enumeration attacks
+    // Protect against account enumeration attacks
     if (!user) {
       return NextResponse.json({
         success: true,
@@ -30,19 +30,19 @@ export async function POST(req: Request) {
     }
 
     // Invalidate existing reset tokens for this user
-    await passwordResets.deleteMany({ email: normalizedEmail });
+    await PasswordReset.deleteMany({ email: normalizedEmail });
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    await passwordResets.insertOne({
+    await PasswordReset.create({
       email: normalizedEmail,
       token,
       expiresAt,
-      createdAt: new Date(),
     });
 
-    const origin = req.headers.get('origin') || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const origin =
+      req.headers.get('origin') || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const resetUrl = `${origin}/auth/reset-password?token=${token}`;
 
     await sendPasswordResetEmail(normalizedEmail, resetUrl);
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       message: 'If an account exists with that email, a password reset link has been sent.',
     });
   } catch (error: any) {
-    console.error('Error in forgot-password route:', error);
+    console.error('Error in Mongoose forgot-password route:', error);
     return NextResponse.json(
       { error: 'Failed to process password reset request.' },
       { status: 500 }

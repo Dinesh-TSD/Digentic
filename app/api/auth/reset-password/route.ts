@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDatabase } from '@/lib/mongodb';
+import connectToDatabase from '@/lib/mongoose';
+import { User } from '@/models/User';
+import { PasswordReset } from '@/models/PasswordReset';
 
 export async function POST(req: Request) {
   try {
@@ -20,11 +22,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const db = await getDatabase();
-    const passwordResets = db.collection('password_resets');
-    const users = db.collection('users');
+    await connectToDatabase();
 
-    const resetRecord = await passwordResets.findOne({ token });
+    const resetRecord = await PasswordReset.findOne({ token });
 
     if (!resetRecord) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     if (new Date() > new Date(resetRecord.expiresAt)) {
-      await passwordResets.deleteOne({ _id: resetRecord._id });
+      await PasswordReset.deleteOne({ _id: resetRecord._id });
       return NextResponse.json(
         { error: 'Password reset link has expired. Please request a new one.' },
         { status: 400 }
@@ -43,25 +43,24 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await users.updateOne(
+    await User.updateOne(
       { email: resetRecord.email },
       {
         $set: {
           password: hashedPassword,
-          updatedAt: new Date(),
         },
       }
     );
 
-    // Remove the used reset record
-    await passwordResets.deleteOne({ _id: resetRecord._id });
+    // Clean up reset record
+    await PasswordReset.deleteOne({ _id: resetRecord._id });
 
     return NextResponse.json({
       success: true,
       message: 'Your password has been updated successfully! You can now sign in.',
     });
   } catch (error: any) {
-    console.error('Error in reset-password route:', error);
+    console.error('Error in Mongoose reset-password route:', error);
     return NextResponse.json(
       { error: 'Failed to reset password. Please try again later.' },
       { status: 500 }
