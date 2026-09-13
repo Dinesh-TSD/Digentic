@@ -73,18 +73,6 @@ export function PostCard({
         {/* Excerpt */}
         <p className="mb-4 line-clamp-2 text-sm text-[#666666] dark:text-[#94a3b8]">{excerpt}</p>
 
-        {/* Author Info */}
-        <div className="mb-4 flex items-center gap-2">
-          <Image
-            src={author.avatar}
-            alt={author.name}
-            width={32}
-            height={32}
-            className="h-8 w-8 rounded-full"
-          />
-          <span className="text-sm font-medium text-[#1a1a1a] dark:text-[#f1f5f9]">{author.name}</span>
-        </div>
-
         {/* Meta */}
         <div className="flex flex-wrap gap-3 border-t border-[#e0e0e0] pt-3 text-xs text-[#666666] dark:border-[#1f1f1f] dark:text-[#94a3b8]">
           <div className="flex items-center gap-1">
@@ -94,10 +82,6 @@ export function PostCard({
           <div className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             <span>{readTime}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Eye className="h-3.5 w-3.5 text-orange-600" />
-            <span className="text-orange-600 font-medium">{views.toLocaleString('en-US')}</span>
           </div>
         </div>
 

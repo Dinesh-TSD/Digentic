@@ -75,31 +75,11 @@ export default function BlogPage() {
 
   return (
     <div className="bg-white dark:bg-[#0a0a0a]">
-      {/* Hero Section */}
-      <section className="border-b border-[#e0e0e0] dark:border-[#1f1f1f] py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            badge="Blog"
-            title="All Articles"
-            subtitle="Deep dives into AI engineering, web development, and building digital products."
-          />
-        </div>
-      </section>
-
+      <h2 className="text-3xl text-center font-bold tracking-tight md:text-4xl">
+        <span className="text-orange-gradient">All Articles</span>
+      </h2>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Featured Post */}
-        {filteredPosts.length > 0 && (
-          <FeaturedPost
-            title={featuredPost.title}
-            excerpt={featuredPost.excerpt}
-            category={featuredPost.category}
-            image={featuredPost.image}
-            author={featuredPost.author}
-            publishDate={featuredPost.publishDate}
-            readTime={featuredPost.readTime}
-            slug={featuredPost.slug}
-          />
-        )}
+
 
         {/* Category Filter Bar */}
         <div className="mb-8 overflow-x-auto">
@@ -108,16 +88,16 @@ export default function BlogPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  selectedCategory === category
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${selectedCategory === category
                     ? 'bg-orange-gradient text-white'
                     : 'border border-[#e0e0e0] bg-white text-[#1a1a1a] hover:border-orange-600 hover:text-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f] dark:text-[#f1f5f9] dark:hover:border-orange-600 dark:hover:text-orange-500'
-                }`}
+                  }`}
               >
                 {category}
               </button>
             ))}
           </div>
+          
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_240px]">

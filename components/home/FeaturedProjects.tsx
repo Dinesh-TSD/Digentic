@@ -71,12 +71,6 @@ export function FeaturedProjects() {
                   ))}
                 </div>
 
-                {/* Stats */}
-                <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>👁️ {project.views} views</span>
-                  <span>⭐ {project.stars} stars</span>
-                </div>
-
                 {/* CTA Buttons */}
                 <div className="mt-5 flex gap-3">
                   <a
