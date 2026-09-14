@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye,
@@ -40,20 +40,60 @@ const CATEGORY_STYLES: Record<string, string> = {
   'Open Source': 'bg-orange-600/20 text-orange-600 border border-orange-600/30',
 };
 
+interface ProjectItem {
+  id?: string;
+  title: string;
+  description: string;
+  tech: string[];
+  category: string;
+  featured: boolean;
+  status: string;
+  views: number;
+  stars: number;
+  image: string | null;
+  liveUrl: string | null;
+  githubUrl: string | null;
+  caseStudyUrl: string | null;
+}
+
 export default function ProjectsPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(8);
   const [loading, setLoading] = useState(false);
+  const [dbProjects, setDbProjects] = useState<ProjectItem[]>([]);
+
+  // Load projects created from the admin dashboard (merged with mock data below)
+  useEffect(() => {
+    let active = true;
+    fetch('/api/projects')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.success && Array.isArray(data.projects)) {
+          setDbProjects(data.projects);
+        }
+      })
+      .catch(() => {
+        // Ignore fetch failures; the mock projects still render
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const projects = useMemo<ProjectItem[]>(
+    () => [...dbProjects, ...MOCK_PROJECTS_FULL],
+    [dbProjects]
+  );
 
   const allTechs = useMemo(() => {
     const techSet = new Set<string>();
-    MOCK_PROJECTS_FULL.forEach((p) => p.tech.forEach((t) => techSet.add(t)));
+    projects.forEach((p) => p.tech.forEach((t) => techSet.add(t)));
     return Array.from(techSet).sort();
-  }, []);
+  }, [projects]);
 
   const filtered = useMemo(() => {
-    return MOCK_PROJECTS_FULL.filter((p) => {
+    return projects.filter((p) => {
       let matchesCategory = true;
       if (activeCategory === 'Featured') {
         matchesCategory = p.featured;
@@ -63,21 +103,21 @@ export default function ProjectsPage() {
       const matchesTech = !selectedTech || p.tech.includes(selectedTech);
       return matchesCategory && matchesTech;
     });
-  }, [activeCategory, selectedTech]);
+  }, [projects, activeCategory, selectedTech]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    MOCK_PROJECTS_FULL.forEach((p) => {
+    projects.forEach((p) => {
       counts[p.category] = (counts[p.category] || 0) + 1;
       if (p.featured) counts['Featured'] = (counts['Featured'] || 0) + 1;
     });
-    counts['All'] = MOCK_PROJECTS_FULL.length;
+    counts['All'] = projects.length;
     return counts;
-  }, []);
+  }, [projects]);
 
-  const totalStars = MOCK_PROJECTS_FULL.reduce((sum, p) => sum + p.stars, 0);
-  const totalViews = MOCK_PROJECTS_FULL.reduce((sum, p) => sum + p.views, 0);
-  const featuredProjects = MOCK_PROJECTS_FULL.filter((p) => p.featured);
+  const totalStars = projects.reduce((sum, p) => sum + p.stars, 0);
+  const totalViews = projects.reduce((sum, p) => sum + p.views, 0);
+  const featuredProjects = projects.filter((p) => p.featured);
 
   const handleLoadMore = () => {
     setLoading(true);
@@ -116,7 +156,7 @@ export default function ProjectsPage() {
             <div className="rounded-xl border border-border bg-[var(--bg-surface)] p-4">
               <div className="text-xs text-muted-foreground">Total Projects</div>
               <div className="mt-1 text-2xl font-bold text-orange-gradient">
-                {MOCK_PROJECTS_FULL.length}
+                {projects.length}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-[var(--bg-surface)] p-4">
@@ -130,7 +170,7 @@ export default function ProjectsPage() {
               <div className="text-xs text-muted-foreground">Active Projects</div>
               <div className="mt-1 flex items-center gap-1.5 text-2xl font-bold text-orange-gradient">
                 <CircleDot className="h-3 w-3 text-green-500" fill="currentColor" />
-                {MOCK_PROJECTS_FULL.filter((p) => p.status === 'Active').length}
+                {projects.filter((p) => p.status === 'Active').length}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-[var(--bg-surface)] p-4">
@@ -205,7 +245,7 @@ export default function ProjectsPage() {
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {filtered.slice(0, visibleCount).map((project, i) => (
                     <motion.article
-                      key={project.title}
+                      key={project.id ?? project.title}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: (i % 4) * 0.08 }}
@@ -213,12 +253,18 @@ export default function ProjectsPage() {
                     >
                       {/* Cover */}
                       <div className="relative h-44 overflow-hidden">
-                        <Image
-                          src={project.image}
-                          alt={project.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
+                        {project.image ? (
+                          <Image
+                            src={project.image}
+                            alt={project.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-orange-600/10">
+                            <Folder className="h-10 w-10 text-orange-600/50" />
+                          </div>
+                        )}
                         {project.featured && (
                           <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white">
                             <Star className="h-3 w-3" fill="currentColor" />
@@ -256,58 +302,31 @@ export default function ProjectsPage() {
                           ))}
                         </div>
 
-                        {/* Stats row */}
-                        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3.5 w-3.5 text-orange-600" />
-                            {project.views >= 1000
-                              ? `${(project.views / 1000).toFixed(1)}K`
-                              : project.views}{' '}
-                            views
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Star
-                              className="h-3.5 w-3.5 text-orange-600"
-                              fill="currentColor"
-                            />
-                            {project.stars}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <CircleDot
-                              className={`h-3 w-3 ${
-                                project.status === 'Active'
-                                  ? 'text-green-500'
-                                  : 'text-blue-500'
-                              }`}
-                              fill="currentColor"
-                            />
-                            {project.status}
-                          </span>
-                        </div>
-
                         {/* Buttons */}
                         <div className="mt-4 flex flex-wrap gap-2">
                           <a
-                            href={project.liveUrl}
+                            href={project.liveUrl || '#'}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-orange-600 px-3 py-1.5 text-xs font-semibold text-orange-600 transition-all hover:bg-orange-600 hover:text-white"
                           >
                             <ExternalLink className="h-3.5 w-3.5" />
                             Live Demo
                           </a>
                           <a
-                            href={project.githubUrl}
+                            href={project.githubUrl || '#'}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-orange-600 px-3 py-1.5 text-xs font-semibold text-orange-600 transition-all hover:bg-orange-600 hover:text-white"
                           >
                             <Github className="h-3.5 w-3.5" />
                             GitHub
                           </a>
-                          <a
-                            href={project.caseStudyUrl}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-gradient px-3 py-1.5 text-xs font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-600/20"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            Case Study
-                          </a>
+                          {project.caseStudyUrl && (
+                            <a
+                              href={project.caseStudyUrl}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-orange-gradient px-3 py-1.5 text-xs font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-600/20"
+                            >
+                              <FileText className="h-3.5 w-3.5" />
+                              Case Study
+                            </a>
+                          )}
                         </div>
                       </div>
                     </motion.article>
@@ -351,7 +370,7 @@ export default function ProjectsPage() {
                     Total Projects
                   </span>
                   <span className="text-sm font-bold text-orange-600">
-                    {MOCK_PROJECTS_FULL.length}
+                    {projects.length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -450,18 +469,24 @@ export default function ProjectsPage() {
               <div className="mt-4 space-y-3">
                 {featuredProjects.slice(0, 4).map((p) => (
                   <a
-                    key={p.title}
-                    href={p.liveUrl}
+                    key={p.id ?? p.title}
+                    href={p.liveUrl || '#'}
                     className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-orange-600/5"
                   >
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                      <Image
-                        src={p.image}
-                        alt={p.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                    {p.image ? (
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+                        <Image
+                          src={p.image}
+                          alt={p.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-orange-600/10">
+                        <Folder className="h-5 w-5 text-orange-600/60" />
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <div className="truncate text-xs font-semibold text-orange-600">
                         {p.title}
