@@ -1,0 +1,5 @@
+- Long-lived resources (MongoDB clients, Mongoose instances) are cached on the Node `global` object so repeated imports within a process reuse a single connection.
+- Environment-dependent behavior is gated on `process.env.*` checks, with development fallbacks (console logging for email, default local MongoDB URI) instead of throwing errors.
+- Static datasets are modeled with explicit TypeScript interfaces or union types at the top of each file and exported as named constants (e.g., `COURSES`, `DIGITAL_PRODUCTS`, `MOCK_*`).
+- Mock data uses placeholder image URLs from Pexels and placeholder video URLs from W3C/YouTube rather than loading real assets.
+- Client-only hooks are marked with the `'use client'` directive at the top of the file and implement state via a reducer pattern with a listener registry.

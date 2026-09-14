@@ -1,0 +1,5 @@
+- Server-side data access goes through the shared `connectToDatabase()` helper in `lib/mongoose.ts` rather than importing the raw client directly.
+- Authentication state is consumed via the `SessionProvider` wrapper in the root layout and accessed on the client through the `@/components/providers/SessionProvider` re-export.
+- Route-specific layouts (`app/*/layout.tsx`) encapsulate per-area chrome such as admin sidebar or dashboard navigation instead of duplicating markup in pages.
+- Environment-sensitive configuration (NextAuth providers, temp admin credentials) is externalized to `auth.config.ts` and `.env.example` instead of being hardcoded.
+- UI components are colocated under `components/<feature>/` matching the route area they serve (home, blog, admin, courses, user), with cross-cutting primitives kept in `components/shared/`.

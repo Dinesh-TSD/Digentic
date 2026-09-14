@@ -1,0 +1,82 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-09-14T07:47:06Z"
+modules:
+    "":
+        dir_name: Digentic Portfolio & Learning Platform (Next.js App Router)
+        title: Digentic Portfolio & Learning Platform (Next.js App Router)
+        scope:
+            - app/
+            - components/
+            - lib/
+            - models/
+            - auth.config.ts
+            - auth.ts
+            - proxy.ts
+            - next.config.js
+            - tailwind.config.ts
+            - postcss.config.js
+            - tsconfig.json
+            - .eslintrc.json
+            - package.json
+            - package-lock.json
+            - components.json
+            - digentic_dashboard_prompt.md
+            - .env.example
+            - .gitignore
+        source_files: []
+        children:
+            - data_models
+            - public_pages
+            - shared_libs
+            - ui_components
+        depends_on: []
+        related_to: []
+    data_models:
+        dir_name: Mongoose Data Models (User & PasswordReset)
+        title: Mongoose Data Models (User & PasswordReset)
+        scope:
+            - models/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: shared_libs
+    public_pages:
+        dir_name: Next.js App Root & Home Page
+        title: Next.js App Root & Home Page
+        scope:
+            - app/page.tsx
+            - app/layout.tsx
+            - app/globals.css
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: shared_libs
+            - path: ui_components
+    shared_libs:
+        dir_name: Shared Libraries & Client Hooks
+        title: Shared Libraries & Client Hooks
+        scope:
+            - lib/
+            - hooks/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: data_models
+            - path: public_pages
+    ui_components:
+        dir_name: Next.js UI Component Library
+        title: Next.js UI Component Library
+        scope:
+            - components/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: public_pages

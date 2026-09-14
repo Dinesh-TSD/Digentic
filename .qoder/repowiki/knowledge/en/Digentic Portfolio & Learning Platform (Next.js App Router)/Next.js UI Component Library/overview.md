@@ -1,0 +1,1 @@
+Client-side React component library organized by feature area (home, blog, admin, courses, user) with shared primitives and layout providers for a Next.js portfolio application.

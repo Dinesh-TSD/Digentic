@@ -1,0 +1,1 @@
+React Server Components with `'use client'` directive, Next.js 15 (`next/link`, `next/image`, `next/navigation`), Tailwind CSS with `clsx`/`cn` utility, Framer Motion for animations, Lucide icons, next-auth session provider, and native HTML `<video>` API wrapped in a custom player.

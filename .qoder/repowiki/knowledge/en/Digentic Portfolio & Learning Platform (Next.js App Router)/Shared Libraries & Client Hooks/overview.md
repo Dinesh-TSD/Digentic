@@ -1,0 +1,1 @@
+Cross-cutting shared modules providing site constants, mock data, MongoDB/Mongoose connection helpers, email sending, utility functions, and a client-side toast notification hook.

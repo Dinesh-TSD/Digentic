@@ -1,0 +1,1 @@
+Requires `MONGODB_URI` environment variable (defaults to `mongodb://127.0.0.1:27017/digentic`) for both native and Mongoose connections; requires `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, and optionally `SMTP_PORT`/`SMTP_FROM` for email sending, otherwise password-reset links are only logged to the console.

@@ -21,7 +21,12 @@ declare global {
 if (process.env.NODE_ENV === 'development') {
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+    global._mongoClientPromise = client.connect().catch((err) => {
+      // Clear the cache on failure so the next request retries
+      // (prevents a one-off network/TLS glitch from being cached forever)
+      global._mongoClientPromise = undefined;
+      throw err;
+    });
   }
   clientPromise = global._mongoClientPromise;
 } else {

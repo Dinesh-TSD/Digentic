@@ -1,0 +1,1 @@
+Standard Next.js scripts: `npm run dev` for development, `npm run build` and `npm start` for production, plus `npm run lint` and `npm run typecheck` (tsc --noEmit). A temporary admin account can be enabled at login via `TEMP_ADMIN_EMAIL` / `TEMP_ADMIN_PASSWORD` environment variables defined in `.env`.

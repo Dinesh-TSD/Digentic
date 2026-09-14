@@ -1,0 +1,1 @@
+Defines the Next.js App Router root layout, global CSS theme tokens, and the home page composed of reusable landing-section components.

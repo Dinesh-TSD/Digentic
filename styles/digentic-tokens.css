@@ -1,0 +1,36 @@
+/* styles/digentic-tokens.css */
+/* Dashboard theme tokens — dark is default; light activates via [data-dt-theme="light"] */
+
+:root,
+[data-dt-theme="dark"] {
+  --dt-bg:        #0a0a0a;
+  --dt-surface:   #111111;
+  --dt-border:    #1f1f1f;
+  --dt-hover:     #1a1a1a;
+  --dt-text:      #f1f5f9;
+  --dt-muted:     #94a3b8;
+  --dt-orange:    #ff8c00;
+  --dt-orange2:   #ff6b35;
+  --dt-orange3:   #ff5733;
+  --dt-o10:       rgba(255,140,0,0.10);
+  --dt-o20:       rgba(255,140,0,0.20);
+  --dt-shadow:    0 1px 3px rgba(0,0,0,0.4);
+}
+
+[data-dt-theme="light"] {
+  --dt-bg:        #f5f6f8;
+  --dt-surface:   #ffffff;
+  --dt-border:    #e5e7eb;
+  --dt-hover:     #f1f5f9;
+  --dt-text:      #0f172a;
+  --dt-muted:     #64748b;
+  --dt-o10:       rgba(255,140,0,0.10);
+  --dt-o20:       rgba(255,140,0,0.18);
+  --dt-shadow:    0 1px 3px rgba(15,23,42,0.08);
+}
+
+/* Smooth theme transition inside dashboards */
+.dt-shell,
+.dt-shell * {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession, useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Hexagon,
@@ -46,7 +46,7 @@ function getAuthErrorMessage(error: string | null): string {
     case 'SessionRequired':
       return 'Please sign in to access this page.';
     case 'AccessDenied':
-      return 'Sign in was cancelled or access was denied.';
+      return 'Sign in was cancelled or access was denied. If you were redirected here, you may not have permission to access that area.';
     case 'Configuration':
       return 'OAuth provider is not properly configured. Check CLIENT_ID and CLIENT_SECRET in your environment.';
     default:
@@ -57,9 +57,10 @@ function getAuthErrorMessage(error: string | null): string {
 export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
   const errorParam = searchParams.get('error');
 
+  const { status: sessionStatus } = useSession();
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
 
   // Form states
@@ -82,6 +83,27 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
     }
   }, [errorParam]);
 
+  // Redirect already-authenticated users away from auth pages
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') return;
+
+    // If there's a specific callbackUrl that differs from the auth page itself, honour it
+    if (callbackUrl && callbackUrl !== '/' && !callbackUrl.startsWith('/auth')) {
+      router.replace(callbackUrl);
+      return;
+    }
+
+    // No specific destination → route by role
+    getSession().then((session) => {
+      const userRole = (session?.user as any)?.role;
+      if (userRole === 'admin') {
+        router.replace('/admin');
+      } else {
+        router.replace('/dashboard');
+      }
+    });
+  }, [sessionStatus, callbackUrl, router]);
+
   // Sync mode with URL if changed
   const switchMode = (newMode: 'login' | 'register') => {
     setMode(newMode);
@@ -89,6 +111,37 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
     setSuccessMessage('');
     const targetUrl = newMode === 'login' ? '/auth/login' : '/auth/register';
     window.history.replaceState(null, '', targetUrl);
+  };
+
+  /**
+   * After successful auth, fetch session to determine user role.
+   * Admin → /admin, User → /dashboard.
+   * If a callbackUrl was explicitly provided (not the default '/'), honour it.
+   */
+  const redirectByRole = async (explicitCallback?: string) => {
+    try {
+      const session = await getSession();
+      const role = (session?.user as any)?.role;
+
+      // If the caller passed a specific callbackUrl (not the root default), use it
+      if (explicitCallback && explicitCallback !== '/') {
+        router.push(explicitCallback);
+        router.refresh();
+        return;
+      }
+
+      // Role-based default destination
+      if (role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
+      router.refresh();
+    } catch {
+      // Fallback if session fetch fails
+      router.push('/dashboard');
+      router.refresh();
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -107,8 +160,7 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
         setErrorMessage('Invalid email or password. Please try again.');
         setLoading(false);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        await redirectByRole(callbackUrl);
       }
     } catch (err) {
       setErrorMessage('An unexpected error occurred. Please try again.');
@@ -170,8 +222,7 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
         switchMode('login');
         setSuccessMessage('Account created! Please sign in below.');
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        await redirectByRole(callbackUrl);
       }
     } catch (err) {
       setErrorMessage('An unexpected error occurred. Please try again.');
@@ -183,7 +234,10 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
     try {
       setErrorMessage('');
       setSocialLoading(provider);
-      await signIn(provider, { callbackUrl });
+      // For OAuth we must let NextAuth handle the full redirect flow.
+      // We pass /dashboard as callbackUrl; admins are then redirected
+      // to /admin by the proxy middleware on /dashboard.
+      await signIn(provider, { callbackUrl: '/dashboard' });
     } catch (err) {
       console.error(`Error during ${provider} sign in:`, err);
       setErrorMessage(
@@ -353,23 +407,6 @@ export function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                 onSubmit={handleLogin}
                 className="space-y-4"
               >
-                {/* Temp Admin Quick-Fill Helper */}
-                <div className="flex items-center justify-between rounded-lg border border-orange-500/20 bg-orange-500/5 px-3 py-2 text-xs">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Temp Admin: <code className="font-mono text-[#ff8c00]">admin@digentic.tech</code>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('admin@digentic.tech');
-                      setPassword('admin123');
-                    }}
-                    className="font-semibold text-[#ff8c00] hover:text-[#ff6b35] underline"
-                  >
-                    Auto-fill
-                  </button>
-                </div>
-
                 <div>
                   <label
                     htmlFor="login-email"

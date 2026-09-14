@@ -1,0 +1,7 @@
+- Every component file starts with the `'use client'` directive to opt into client-side rendering.
+- Props are declared as TypeScript interfaces (e.g. `CTAButtonProps`, `PostCardProps`, `VideoPlayerProps`) and destructured directly in the function signature.
+- Styling combines Tailwind utility classes with the `cn(...)` helper from `@/lib/utils` to merge base, variant, and user-supplied className strings.
+- Interactive elements use Framer Motion's `motion.div`/`motion.article` with `initial`/`animate`/`whileInView` props for entrance and hover animations.
+- Icons are imported from `lucide-react` and passed as JSX elements to components that accept an optional `icon` prop.
+- Navigation is done through `next/link` rather than anchor tags, and active route highlighting is computed with `usePathname()` using exact match or `startsWith` checks.
+- Dark mode is driven by toggling the `dark` class on `document.documentElement` and persisting the preference in `localStorage` under the key `digentic-theme`.

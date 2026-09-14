@@ -1,0 +1,1 @@
+Mongoose ODM with TypeScript; bcryptjs for password hashing; MongoDB TTL indexes for token expiration.

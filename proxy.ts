@@ -8,18 +8,37 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
   const isLoggedIn = !!session?.user;
+  const userRole = (session?.user as any)?.role;
 
-  // 1. Dashboard routes: /dashboard or /dashboard/*
+  // ── Admin routes: /admin or /admin/* ──
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    if (!isLoggedIn) {
+      const loginUrl = new URL('/auth/login', req.nextUrl.origin);
+      loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    // Only admins can access /admin
+    if (userRole !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin));
+    }
+    return NextResponse.next();
+  }
+
+  // ── Dashboard routes: /dashboard or /dashboard/* ──
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
     if (!isLoggedIn) {
       const loginUrl = new URL('/auth/login', req.nextUrl.origin);
       loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
+    // Admins visiting /dashboard get redirected to /admin
+    if (userRole === 'admin') {
+      return NextResponse.redirect(new URL('/admin', req.nextUrl.origin));
+    }
     return NextResponse.next();
   }
 
-  // 2. Course learn routes: /courses/:id/learn or /courses/:id/learn/*
+  // ── Course learn routes: /courses/:id/learn or /courses/:id/learn/* ──
   const courseLearnMatch = pathname.match(/^\/courses\/([^/]+)\/learn(\/.*)?$/);
   if (courseLearnMatch) {
     if (!isLoggedIn) {
@@ -29,7 +48,6 @@ export default auth((req) => {
     }
 
     const courseId = courseLearnMatch[1];
-    const userRole = (session?.user as any)?.role;
     const enrolledCourses: string[] = (session?.user as any)?.enrolledCourses || [];
 
     const isEnrolled = userRole === 'admin' || enrolledCourses.includes(courseId);
@@ -43,7 +61,7 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // 3. Digital download routes: /digital/download or /digital/downloads
+  // ── Digital download routes: /digital/download or /digital/downloads ──
   const digitalDownloadMatch = pathname.match(/^\/digital\/downloads?(\/.*)?$/);
   if (digitalDownloadMatch) {
     if (!isLoggedIn) {
@@ -52,7 +70,6 @@ export default auth((req) => {
       return NextResponse.redirect(loginUrl);
     }
 
-    const userRole = (session?.user as any)?.role;
     const purchasedDigital: string[] = (session?.user as any)?.purchasedDigital || [];
 
     const productSlug = digitalDownloadMatch[1]?.replace(/^\//, '');
@@ -79,6 +96,8 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
+    '/admin/:path*',
+    '/admin',
     '/courses/:id/learn/:path*',
     '/courses/:id/learn',
     '/digital/download/:path*',
