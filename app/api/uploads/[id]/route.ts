@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import { auth } from '@/auth';
 import connectToDatabase from '@/lib/mongoose';
 import { Upload } from '@/models/Upload';
 
@@ -32,7 +33,6 @@ export async function GET(
       headers: {
         'Content-Type': upload.contentType || 'application/octet-stream',
         'Content-Length': String(bytes.byteLength),
-        // Uploads are immutable, so the browser can cache them forever
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-Content-Type-Options': 'nosniff',
       },
@@ -40,5 +40,33 @@ export async function GET(
   } catch (error: any) {
     console.error('Error serving upload:', error);
     return NextResponse.json({ error: 'Failed to load file.' }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/uploads/[id] — delete an upload (admin only)
+ */
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email || (session.user as { role?: string }).role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid id.' }, { status: 400 });
+    }
+
+    await connectToDatabase();
+    await Upload.findByIdAndDelete(id);
+
+    return NextResponse.json({ success: true, message: 'Upload deleted.' });
+  } catch (error: any) {
+    console.error('Error deleting upload:', error);
+    return NextResponse.json({ error: 'Failed to delete upload.' }, { status: 500 });
   }
 }

@@ -10,14 +10,10 @@ interface PostCardProps {
   title: string;
   excerpt: string;
   category: string;
-  image: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  publishDate: string;
-  readTime: string;
-  views: number;
+  image?: string | null;
+  publishDate?: string;
+  readTime?: string;
+  views?: number;
   slug: string;
   index?: number;
 }
@@ -27,7 +23,6 @@ export function PostCard({
   excerpt,
   category,
   image,
-  author,
   publishDate,
   readTime,
   views,
@@ -42,26 +37,28 @@ export function PostCard({
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="group overflow-hidden rounded-lg border border-[#e0e0e0] bg-white transition-all hover:border-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f]"
     >
-      {/* Image */}
-      <Link href={`/blog/${slug}`} className="relative block overflow-hidden bg-[#f5f5f5] dark:bg-[#0a0a0a]">
-        <Image
-          src={image}
-          alt={title}
-          width={400}
-          height={250}
-          className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      {/* Image with Category Badge Overlay */}
+      <Link href={`/blog/${slug}`} className="relative block h-44 w-full overflow-hidden bg-orange-600/10">
+        {image ? (
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-orange-600/5">
+            <span className="text-3xl">📝</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+        <span className="absolute left-3 top-3 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+          {category}
+        </span>
       </Link>
 
       {/* Content */}
       <div className="p-4">
-        {/* Category Badge */}
-        <div className="mb-3 inline-block">
-          <span className="rounded-full bg-orange-600 px-3 py-1 text-xs font-semibold text-white">
-            {category}
-          </span>
-        </div>
 
         {/* Title */}
         <Link href={`/blog/${slug}`}>

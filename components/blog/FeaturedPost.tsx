@@ -9,13 +9,9 @@ interface FeaturedPostProps {
   title: string;
   excerpt: string;
   category: string;
-  image: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  publishDate: string;
-  readTime: string;
+  image?: string | null;
+  publishDate?: string;
+  readTime?: string;
   slug: string;
 }
 
@@ -24,7 +20,6 @@ export function FeaturedPost({
   excerpt,
   category,
   image,
-  author,
   publishDate,
   readTime,
   slug,
@@ -37,27 +32,29 @@ export function FeaturedPost({
       className="mb-8 overflow-hidden rounded-lg border border-[#e0e0e0] bg-white transition-all hover:border-orange-600 dark:bg-[#111111] dark:border-[#1f1f1f]"
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-        {/* Image */}
-        <Link href={`/blog/${slug}`} className="relative block overflow-hidden bg-[#f5f5f5] dark:bg-[#0a0a0a]">
-          <Image
-            src={image}
-            alt={title}
-            width={600}
-            height={400}
-            className="h-96 w-full object-cover transition-transform duration-300 hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+        {/* Image with Category Badge Overlay */}
+        <Link href={`/blog/${slug}`} className="relative block h-72 w-full overflow-hidden bg-orange-600/10 lg:h-full">
+          {image ? (
+            <Image
+              src={image}
+              alt={title}
+              fill
+              className="object-cover transition-transform duration-300 hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-orange-600/5">
+              <span className="text-5xl">📝</span>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 hover:opacity-80 transition-opacity" />
+          <span className="absolute left-4 top-4 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+            {category}
+          </span>
         </Link>
 
         {/* Content */}
         <div className="flex flex-col justify-between p-6 lg:p-8">
-          {/* Category Badge */}
           <div>
-            <div className="mb-4 inline-block">
-              <span className="rounded-full bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white">
-                {category}
-              </span>
-            </div>
 
             {/* Title */}
             <Link href={`/blog/${slug}`}>
