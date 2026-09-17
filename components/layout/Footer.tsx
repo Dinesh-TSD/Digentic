@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Github, Linkedin, Twitter, Mail, Hexagon, Heart } from 'lucide-react';
+import { Github, Linkedin, Twitter, Mail, Heart } from 'lucide-react';
 import { useState } from 'react';
+import { Logo } from './Logo';
 import { SITE_CONFIG, FOOTER_LINKS } from '@/lib/constants';
 
 export function Footer() {
@@ -24,12 +25,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2">
-              <Hexagon className="h-7 w-7 text-orange-600" fill="currentColor" />
-              <span className="text-lg font-bold">
-                <span className="text-orange-gradient">DIGENTIC TECH</span>
-              </span>
-            </Link>
+            <Logo size="md" showTagline />
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               {SITE_CONFIG.tagline}
             </p>

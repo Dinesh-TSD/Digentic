@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Hexagon, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { ThemeToggle } from './ThemeToggle';
+import { Logo } from './Logo';
 import { NAV_LINKS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -53,12 +54,7 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Hexagon className="h-7 w-7 text-orange-600" fill="currentColor" />
-          <span className="text-lg font-bold tracking-tight">
-            <span className="text-orange-gradient">DIGENTIC TECH</span>
-          </span>
-        </Link>
+        <Logo size="md" />
 
         {/* Desktop Nav */}
         <div className="hidden items-center gap-1 md:flex">
