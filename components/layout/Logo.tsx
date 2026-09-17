@@ -6,14 +6,15 @@ import Image from 'next/image';
 interface LogoProps {
   className?: string;
   showTagline?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export function Logo({ className = '', showTagline = false, size = 'md' }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-6 w-auto',
-    md: 'h-8 w-auto',
-    lg: 'h-10 w-auto',
+    sm: 'h-8 w-auto',
+    md: 'h-12 w-auto',
+    lg: 'h-16 w-auto',
+    xl: 'h-20 w-auto',
   };
 
   return (
@@ -21,8 +22,8 @@ export function Logo({ className = '', showTagline = false, size = 'md' }: LogoP
       <Image
         src="/images/logo.png"
         alt="DIGENTIC TECH - The DNA of AI Technology"
-        width={200}
-        height={50}
+        width={400}
+        height={100}
         priority
         className={`${sizeClasses[size]} object-contain`}
       />
