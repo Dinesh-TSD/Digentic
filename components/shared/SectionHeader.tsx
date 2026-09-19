@@ -32,7 +32,7 @@ export function SectionHeader({
         <span className="text-orange-gradient">{title}</span>
       </h2>
       {subtitle && (
-        <p className="mt-3 text-base text-muted-foreground md:text-lg">
+        <p className="mt-3 text-base text-[var(--text-muted)] md:text-lg">
           {subtitle}
         </p>
       )}

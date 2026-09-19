@@ -19,23 +19,23 @@ export function HeroSection() {
             transition={{ duration: 0.65, ease: 'easeOut' }}
             className="max-w-2xl"
           >
-            <p className="mb-4 text-[clamp(1rem,5vw,1.4rem)] font-bold uppercase tracking-[0.2em] text-orange-500 ">
+            <p className="mb-4 text-[clamp(1rem,5vw,1.4rem)] font-bold uppercase tracking-[0.2em] text-orange-600 ">
              I AM  Dinesh TS 
             </p>
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-orange-600/20 bg-orange-600/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-orange-300 sm:text-xs">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-orange-600/20 bg-orange-600/[0.08] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-orange-600 sm:text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(255,140,0,0.9)]" />
               Role Matrix:
-              <span className="text-orange-100">AI Systems Architect</span>
+              <span className="text-orange-500">AI Systems Architect</span>
             </div>
 
-            <h1 className="max-w-2xl text-[clamp(1rem,8vw,3.4rem)] font-extrabold leading-[0.98] tracking-[-0.055em] text-[#f1f5f9]">
+            <h1 className="max-w-2xl text-[clamp(1rem,8vw,3.4rem)] font-extrabold leading-[0.98] tracking-[-0.055em] text-[var(--text-primary)]">
               <span className="block">Engineering Next-Gen</span>
               <span className="block bg-orange-gradient bg-clip-text text-transparent">
                 AI Intelligence
               </span>
             </h1>
 
-            <p className="mt-7 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+            <p className="mt-7 max-w-2xl text-base leading-7 text-[var(--text-muted)] sm:text-lg">
               High-performance Machine Learning practitioner and Full-Stack
               Architect. Bridging cutting-edge LLMs, multi-agent frameworks, and
               ultra-scalable Next.js 15 production backends.
@@ -63,7 +63,7 @@ export function HeroSection() {
             className="relative h-[300px] sm:h-[300px] lg:h-[400px]"
           >
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-600/10 to-orange-700/5 backdrop-blur-sm border border-orange-600/20 flex items-center justify-center">
-              <div className="text-center text-slate-400">
+              <div className="text-center text-[var(--text-muted)]">
                 <p className="text-sm font-medium">Hero Image</p>
                 <p className="text-xs mt-1">Add your image here</p>
               </div>

@@ -17,7 +17,7 @@ export function HeroBlock({ block }: { block: HeroBlockData }) {
           {block.title}
         </h2>
         {block.subtitle && (
-          <p className="mt-3 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-3 text-base sm:text-lg text-[var(--text-muted)] leading-relaxed">
             {block.subtitle}
           </p>
         )}

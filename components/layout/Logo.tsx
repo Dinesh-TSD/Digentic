@@ -12,9 +12,9 @@ interface LogoProps {
 export function Logo({ className = '', showTagline = false, size = 'md' }: LogoProps) {
   const sizeClasses = {
     sm: 'h-8 w-auto',
-    md: 'h-12 w-auto',
-    lg: 'h-16 w-auto',
-    xl: 'h-20 w-auto',
+    md: 'h-10 w-auto',
+    lg: 'h-12 w-auto',
+    xl: 'h-14 w-auto',
   };
 
   return (
@@ -23,12 +23,12 @@ export function Logo({ className = '', showTagline = false, size = 'md' }: LogoP
         src="/images/logo.png"
         alt="DIGENTIC TECH - The DNA of AI Technology"
         width={400}
-        height={100}
+        height={80}
         priority
         className={`${sizeClasses[size]} object-contain`}
       />
       {showTagline && (
-        <span className="hidden lg:block text-xs text-muted-foreground ml-2">
+        <span className="hidden lg:block text-xs text-[var(--text-muted)]">
           THE DNA OF AI TECHNOLOGY
         </span>
       )}
