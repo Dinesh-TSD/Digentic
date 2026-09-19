@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTheme } from './ThemeProvider';
 
 interface LogoProps {
   className?: string;
@@ -10,6 +11,7 @@ interface LogoProps {
 }
 
 export function Logo({ className = '', showTagline = false, size = 'md' }: LogoProps) {
+  const { theme } = useTheme();
   const sizeClasses = {
     sm: 'h-8 w-auto',
     md: 'h-10 w-auto',
@@ -17,10 +19,20 @@ export function Logo({ className = '', showTagline = false, size = 'md' }: LogoP
     xl: 'h-14 w-auto',
   };
 
+  const logotextSrc = theme === 'dark' ? '/images/logotext_w.png' : '/images/logotext_b.png';
+
   return (
     <Link href="/" className={`flex items-center gap-2 ${className}`}>
       <Image
         src="/images/logo.png"
+        alt="DIGENTIC TECH"
+        width={400}
+        height={80}
+        priority
+        className={`${sizeClasses[size]} object-contain`}
+      />
+      <Image
+        src={logotextSrc}
         alt="DIGENTIC TECH - The DNA of AI Technology"
         width={400}
         height={80}
