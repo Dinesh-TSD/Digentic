@@ -6,7 +6,6 @@ import Link from 'next/link';
 import {
   Star,
   BookOpen,
-  Clock,
   Users,
   ChevronDown,
   ChevronUp,
@@ -35,18 +34,14 @@ const CATEGORIES = [
   { label: 'Freelancing & Career', value: 'Freelancing & Career', icon: Briefcase },
 ];
 
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
 const RATINGS = [4, 3, 2] as const;
 const ITEMS_PER_PAGE = 6;
 
 // ---------------------------------------------------------------------------
-// Level badge styles
+// Tag styles
 // ---------------------------------------------------------------------------
-const LEVEL_STYLES: Record<Course['level'], string> = {
-  Beginner: 'bg-orange-100 text-orange-600 dark:bg-[#ff8c00]/10 dark:text-[#ff8c00]',
-  Intermediate: 'bg-orange-500/20 text-orange-600 dark:bg-[#ff8c00]/20 dark:text-[#ff8c00]',
-  Advanced: 'bg-[#ff8c00] text-white',
-};
+const TAG_STYLES = 'bg-[#ff8c00] text-white';
+
 
 // ---------------------------------------------------------------------------
 // Star rating renderer
@@ -84,30 +79,14 @@ function CourseCard({ course }: { course: Course }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-        {/* Level badge */}
-        <span className={`absolute left-3 top-3 rounded-md px-2.5 py-1 text-xs font-semibold ${LEVEL_STYLES[course.level]}`}>
-          {course.level}
-        </span>
-
-        {/* Free badge */}
-        {isFree && (
-          <span className="absolute right-3 top-3 rounded-md bg-[#ff8c00] px-2.5 py-1 text-xs font-bold text-white">
-            FREE
-          </span>
-        )}
-
-        {/* Duration pill */}
-        <span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-[#ff8c00] px-2.5 py-1 text-xs font-semibold text-white">
-          <Clock className="h-3 w-3" />
-          {course.duration}
+        {/* Category tag overlay */}
+        <span className={`absolute left-3 top-3 rounded-md px-2.5 py-1 text-xs font-semibold ${TAG_STYLES}`}>
+          {course.category}
         </span>
       </div>
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
-        {/* Category */}
-        <p className="mb-1.5 text-xs font-medium text-[#ff8c00]">{course.category}</p>
-
         {/* Title */}
         <h3 className="mb-2 line-clamp-2 text-sm font-bold leading-snug text-[#1a1a1a] transition-colors group-hover:text-[#ff8c00] dark:text-[#f1f5f9] dark:group-hover:text-[#ff8c00]">
           {course.title}
@@ -133,18 +112,6 @@ function CourseCard({ course }: { course: Course }) {
         {/* Rating */}
         <div className="mb-3">
           <StarRating rating={course.rating} />
-        </div>
-
-        {/* Instructor */}
-        <div className="mb-4 flex items-center gap-2">
-          <Image
-            src={course.instructor.avatar}
-            alt={course.instructor.name}
-            width={24}
-            height={24}
-            className="h-6 w-6 rounded-full object-cover"
-          />
-          <span className="text-xs text-[#666666] dark:text-[#94a3b8]">{course.instructor.name}</span>
         </div>
 
         {/* Price + CTA */}
@@ -176,7 +143,6 @@ function CourseCard({ course }: { course: Course }) {
 // Sidebar filters
 // ---------------------------------------------------------------------------
 interface Filters {
-  levels: string[];
   minRating: number;
   maxPrice: number;
   onlyFree: boolean;
@@ -191,19 +157,10 @@ function Sidebar({
   onChange: (f: Filters) => void;
   onClear: () => void;
 }) {
-  const [levelsOpen, setLevelsOpen] = useState(true);
   const [priceOpen, setPriceOpen] = useState(true);
   const [ratingOpen, setRatingOpen] = useState(true);
 
-  const toggleLevel = (level: string) => {
-    const next = filters.levels.includes(level)
-      ? filters.levels.filter((l) => l !== level)
-      : [...filters.levels, level];
-    onChange({ ...filters, levels: next });
-  };
-
   const hasActiveFilters =
-    filters.levels.length > 0 ||
     filters.minRating > 0 ||
     filters.maxPrice < 3000 ||
     filters.onlyFree;
@@ -238,29 +195,6 @@ function Sidebar({
       </div>
 
       <div className="space-y-1 divide-y divide-[#e0e0e0] dark:divide-[#1f1f1f]">
-        {/* Level */}
-        <div className="pb-4">
-          {sectionHeader('Level', levelsOpen, () => setLevelsOpen((o) => !o))}
-          {levelsOpen && (
-            <div className="mt-2 space-y-2">
-              {LEVELS.map((level) => (
-                <label key={level} className="flex cursor-pointer items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={filters.levels.includes(level)}
-                    onChange={() => toggleLevel(level)}
-                    className="h-4 w-4 rounded accent-[#ff8c00]"
-                  />
-                  <span className="text-sm text-[#1a1a1a] dark:text-[#f1f5f9]">{level}</span>
-                  <span className={`ml-auto rounded px-1.5 py-0.5 text-xs ${LEVEL_STYLES[level]}`}>
-                    {COURSES.filter((c) => c.level === level).length}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Price */}
         <div className="py-4">
           {sectionHeader('Price', priceOpen, () => setPriceOpen((o) => !o))}
@@ -389,7 +323,6 @@ function Pagination({
 // Default filter state
 // ---------------------------------------------------------------------------
 const DEFAULT_FILTERS: Filters = {
-  levels: [],
   minRating: 0,
   maxPrice: 3000,
   onlyFree: false,
@@ -407,7 +340,6 @@ export default function CoursesPage() {
   const filtered = useMemo(() => {
     return COURSES.filter((c) => {
       if (activeCategory !== 'All' && c.category !== activeCategory) return false;
-      if (filters.levels.length > 0 && !filters.levels.includes(c.level)) return false;
       if (filters.minRating > 0 && c.rating < filters.minRating) return false;
       if (filters.onlyFree && c.price !== 0) return false;
       if (!filters.onlyFree && filters.maxPrice < 3000 && c.price > filters.maxPrice) return false;
