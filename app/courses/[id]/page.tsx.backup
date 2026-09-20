@@ -1,7 +1,7 @@
 'use client';
 
 import { notFound } from 'next/navigation';
-import { use, useState, useEffect } from 'react';
+import { use, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -24,8 +24,9 @@ import {
   Twitter,
   ThumbsUp,
 } from 'lucide-react';
-import { VideoPlayer } from '@/components/courses/VideoPlayer';
+import { COURSES } from '@/lib/courses-data';
 import type { Course } from '@/lib/courses-data';
+import { VideoPlayer } from '@/components/courses/VideoPlayer';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -165,60 +166,18 @@ type Tab = typeof TABS[number];
 
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [course, setCourse] = useState<Course | null>(null);
-  const [relatedCourses, setRelatedCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const course = COURSES.find((c) => c.id === id);
+  if (!course) notFound();
 
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [showVideo, setShowVideo] = useState(false);
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/courses/${id}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          setCourse(result.data);
-          // Fetch related courses
-          const relatedResponse = await fetch(`/api/courses?category=${result.data.category}&limit=4`);
-          const relatedResult = await relatedResponse.json();
-          if (relatedResult.success) {
-            setRelatedCourses(relatedResult.data.filter((c: Course) => c.id !== result.data.id));
-          }
-        } else {
-          setError(result.error || 'Course not found');
-        }
-      } catch (err) {
-        console.error('Error fetching course:', err);
-        setError('Failed to load course');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCourse();
-  }, [id]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#ff8c00] border-t-transparent" />
-          <p className="text-sm text-[#666666] dark:text-[#94a3b8]">Loading course...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !course) {
-    notFound();
-  }
-
   const isFree = course.price === 0;
+  const related = COURSES.filter((c) => c.id !== course.id && c.category === course.category).slice(0, 4);
+  const fallbackRelated = COURSES.filter((c) => c.id !== course.id).slice(0, 4);
+  const relatedCourses = related.length >= 2 ? related : fallbackRelated;
+
   const filteredReviews = ratingFilter
     ? course.reviews.filter((r) => r.rating === ratingFilter)
     : course.reviews;
