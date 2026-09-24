@@ -1,1 +1,0 @@
-Defines Mongoose schemas and TypeScript interfaces for the User and PasswordReset collections, including validation rules, indexes, and a password comparison method.

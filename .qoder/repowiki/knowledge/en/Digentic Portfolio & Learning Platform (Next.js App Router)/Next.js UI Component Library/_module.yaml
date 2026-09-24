@@ -1,9 +1,0 @@
-schema_version: 1
-module_path: ui_components
-title: Next.js UI Component Library
-scope:
-    - components/
-source_files: []
-depends_on: []
-related_to:
-    - path: public_pages

@@ -1,1 +1,0 @@
-Next.js App Router application that wires public pages, admin and user dashboards, a blog/courses/digital-products storefront, NextAuth authentication, and Mongoose-backed data models into a single portfolio-and-learning platform.

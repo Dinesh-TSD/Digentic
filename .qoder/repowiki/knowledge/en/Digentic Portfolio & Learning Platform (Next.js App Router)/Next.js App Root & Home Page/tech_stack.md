@@ -1,1 +1,0 @@
-Next.js App Router with TypeScript, Tailwind CSS v4 `@layer` directives, Google Fonts (Inter), and CSS custom properties for theming.

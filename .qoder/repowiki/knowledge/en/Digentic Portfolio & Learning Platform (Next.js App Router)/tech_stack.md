@@ -1,1 +1,0 @@
-Next.js 16 App Router with React 19, NextAuth v5 + @auth/mongodb-adapter for JWT-based sessions backed by MongoDB/Mongoose, Tailwind CSS 3 with shadcn/ui primitives, Zod for validation, react-hook-form for forms, and Nodemailer for email workflows.

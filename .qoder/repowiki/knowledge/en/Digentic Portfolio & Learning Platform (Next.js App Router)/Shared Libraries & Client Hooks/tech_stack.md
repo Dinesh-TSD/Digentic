@@ -1,1 +1,0 @@
-TypeScript modules using `mongodb` driver with ServerApi v1, `mongoose` for ODM, `nodemailer` for SMTP password-reset emails, `clsx` + `tailwind-merge` for class name merging, and React hooks for a custom toast system.

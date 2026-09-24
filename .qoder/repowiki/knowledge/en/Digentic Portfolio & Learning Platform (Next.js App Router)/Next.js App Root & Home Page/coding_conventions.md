@@ -1,4 +1,0 @@
-- Root layout wraps every route in a fixed provider stack (`AuthSessionProvider` then `ThemeProvider`) before rendering `children`.
-- Global theme colors are exposed as CSS custom properties under both `:root` and `.dark` selectors so components consume semantic tokens instead of hard-coded values.
-- The home page is built by composing small, single-purpose section components from `@/components/home/*` rather than inline markup.
-- Tailwind is used through `@tailwind` directives and `@layer` blocks (base/components/utilities) in `globals.css` instead of ad-hoc styles.

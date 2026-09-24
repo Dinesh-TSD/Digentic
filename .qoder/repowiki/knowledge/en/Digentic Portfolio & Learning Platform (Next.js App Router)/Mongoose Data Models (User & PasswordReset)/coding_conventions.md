@@ -1,4 +1,0 @@
-- Each model file defines a TypeScript interface extending `Document` alongside a typed `Schema<T>` and exports both the concrete `Model<T>` and the interface from a barrel `index.ts`.
-- Models are registered as singletons using the `mongoose.models.<Name> || mongoose.model(...)` pattern to prevent duplicate model registration across hot-reloads.
-- Field validation uses inline Mongoose options (`required`, `trim`, `lowercase`, `match`, `enum`, `default`) rather than external validators.
-- String fields that serve as identifiers or keys are marked `unique: true` and `index: true` to enforce database-level constraints.

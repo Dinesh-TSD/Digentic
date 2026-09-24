@@ -1,1 +1,0 @@
-Requires the environment variable `NEXT_PUBLIC_SITE_URL` to be set for `metadataBase`; falls back to `http://localhost:3000` when absent.
