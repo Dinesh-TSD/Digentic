@@ -10,7 +10,7 @@ export function AboutSnapshot() {
   const allSkills = Object.values(MOCK_SKILLS).flat();
 
   return (
-    <section className="py-20">
+    <section className="pb-20 pt-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="About Me"
@@ -39,7 +39,7 @@ export function AboutSnapshot() {
             </p>
             <Link
               href="/about"
-              className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-orange-600 transition-colors hover:underline"
+              className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#0ea5e9] transition-colors hover:underline"
             >
               View Full Profile
               <ArrowRight className="h-4 w-4" />
@@ -56,7 +56,7 @@ export function AboutSnapshot() {
             {allSkills.map((skill, i) => (
               <span
                 key={skill}
-                className="rounded-lg border border-border bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-all hover:border-orange-600 hover:text-orange-600"
+                className="rounded-lg border border-border bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-all hover:border-[#22d3ee] hover:text-[#0369a1]"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 {skill}

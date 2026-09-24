@@ -1,7 +1,7 @@
 'use client';
 
 import { notFound } from 'next/navigation';
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -21,8 +21,8 @@ import {
   ThumbsUp,
   Send,
   X,
+  Award,
 } from 'lucide-react';
-import { COURSES } from '@/lib/courses-data';
 import type { Lesson, Section } from '@/lib/courses-data';
 import { SAMPLE_VIDEOS } from '@/lib/courses-data';
 import { VideoPlayer } from '@/components/courses/VideoPlayer';
@@ -379,13 +379,221 @@ export default function LearnPage({
   params: Promise<{ id: string; lesson: string }>;
 }) {
   const { id: courseId, lesson: lessonId } = use(params);
-  const course = COURSES.find((c) => c.id === courseId);
-  if (!course) notFound();
+  const [course, setCourse] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [bottomTab, setBottomTab] = useState<BottomTab>('notes');
+  const [progress, setProgress] = useState(0);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [certificate, setCertificate] = useState<{ certificateId: string; issuedAt: string } | null>(null);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [apiProgress, setApiProgress] = useState<number>(0);
+  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Load localStorage progress for unauthenticated users
+  useEffect(() => {
+    const saved = localStorage.getItem(`course-progress-${courseId}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCompleted(new Set(parsed.completed || []));
+        setApiProgress(parsed.progressPercent || 0);
+      } catch (e) {
+        console.error('Failed to parse saved progress:', e);
+      }
+    }
+  }, [courseId]);
+
+  // Save progress to localStorage
+  const saveProgressToStorage = (newCompleted: Set<string>, newProgressPercent: number) => {
+    localStorage.setItem(`course-progress-${courseId}`, JSON.stringify({
+      completed: Array.from(newCompleted),
+      progressPercent: newProgressPercent,
+    }));
+  };
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/courses/${courseId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          setCourse(result.data);
+        } else {
+          setError(result.error || 'Course not found');
+        }
+      } catch (err) {
+        console.error('Error fetching course:', err);
+        setError('Failed to load course');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourse();
+
+    // Get user session
+    const getSession = async () => {
+      try {
+        const res = await fetch('/api/auth/session');
+        const data = await res.json();
+        if (data?.user?._id) setUserId(data.user._id);
+        else if (data?.user?.id) setUserId(data.user.id);
+        if (data?.user?.enrolledCourses) setEnrolledCourses(data.user.enrolledCourses);
+        if (data?.user?.role === 'admin') setIsAdmin(true);
+      } catch (e) {
+        console.error('Failed to get session:', e);
+      }
+    };
+    getSession();
+  }, [courseId]);
+
+  // Fetch progress on mount and when userId changes
+  useEffect(() => {
+    if (!userId || !courseId) return;
+    
+    const fetchProgress = async () => {
+      try {
+        const res = await fetch(`/api/courses/${courseId}/progress`);
+        const result = await res.json();
+        if (result.success) {
+          const completedSet = new Set<string>(result.data.completedLessons || []);
+          setCompleted(completedSet);
+          setApiProgress(result.data.progressPercentage || 0);
+          
+          // Check for certificate
+          if (result.data.completedAt && !certificate) {
+            const certRes = await fetch(`/api/courses/${courseId}/certificate`);
+            const certResult = await certRes.json();
+            if (certResult.success) {
+              setCertificate(certResult.data);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch progress:', e);
+      }
+    };
+    fetchProgress();
+  }, [userId, courseId, certificate]);
+
+  // Auto-complete lesson when video progress reaches 80%
+  useEffect(() => {
+    if (videoProgress >= 0.8 && !completed.has(lessonId)) {
+      const markLessonComplete = async () => {
+        try {
+          const res = await fetch(`/api/courses/${courseId}/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lessonId, isComplete: true }),
+          });
+          const result = await res.json();
+          console.log('Auto-complete result:', result);
+          if (result.success) {
+            setCompleted(prev => {
+              const next = new Set(prev);
+              next.add(lessonId);
+              return next;
+            });
+            
+            // Update progress percent
+            const newProgressPercent = result.data.progressPercentage || Math.round(((completed.size + 1) / (course?.curriculum?.flatMap((s: any) => s.lessons).length || 1)) * 100);
+            setApiProgress(newProgressPercent);
+            saveProgressToStorage(new Set([...completed, lessonId]), newProgressPercent);
+            
+            // Refetch progress to get updated percentage
+            const progressRes = await fetch(`/api/courses/${courseId}/progress`);
+            const progressResult = await progressRes.json();
+            if (progressResult.success) {
+              console.log('Updated progress:', progressResult.data);
+            }
+            
+            // Check if course is fully completed
+            if (result.data.progressPercentage === 100) {
+              // Fetch certificate
+              const certRes = await fetch(`/api/courses/${courseId}/certificate`);
+              const certResult = await certRes.json();
+              console.log('Certificate check:', certResult);
+              if (certResult.success) {
+                setCertificate(certResult.data);
+                setShowCertificate(true);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Failed to mark lesson complete:', e);
+        }
+      };
+      markLessonComplete();
+    }
+  }, [videoProgress, lessonId, completed, courseId, course?.curriculum]);
 
   // Flatten all lessons
-  const allLessons: { lesson: Lesson; section: Section }[] = course.curriculum.flatMap((s) =>
-    s.lessons.map((l) => ({ lesson: l, section: s }))
-  );
+  const allLessons: { lesson: Lesson; section: Section }[] =
+    course?.curriculum?.flatMap((s: Section) =>
+      s.lessons.map((l: Lesson) => ({ lesson: l, section: s }))
+    ) ?? [];
+
+  const localProgressPercent = allLessons.length > 0
+    ? Math.round((completed.size / allLessons.length) * 100)
+    : 0;
+  const progressPercent = apiProgress > 0 ? apiProgress : localProgressPercent;
+
+  // Save to localStorage when completed changes
+  useEffect(() => {
+    if (!userId) {
+      saveProgressToStorage(completed, progressPercent);
+    }
+  }, [completed, progressPercent, userId, courseId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-64px)] flex-col bg-white dark:bg-[#0a0a0a] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#ff8c00] border-t-transparent" />
+          <p className="text-sm text-[#666666] dark:text-[#94a3b8]">Loading lesson...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !course) {
+    notFound();
+  }
+
+  // Check enrollment for non-free courses
+  const isFree = course.price === 0;
+  const isEnrolled = userId && enrolledCourses.includes(courseId);
+  const adminAccess = isAdmin;
+  
+  // Allow access if: free course, enrolled user, or admin
+  if (!isFree && !isEnrolled && !adminAccess) {
+    return (
+      <div className="flex h-[calc(100vh-64px)] flex-col bg-white dark:bg-[#0a0a0a] items-center justify-center">
+        <div className="text-center p-8">
+          <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">
+            <Lock className="h-8 w-8 text-[#ff8c00]" />
+          </div>
+          <h2 className="mb-2 text-xl font-bold text-[#1a1a1a] dark:text-[#f1f5f9]">Enrollment Required</h2>
+          <p className="mb-6 text-sm text-[#666666] dark:text-[#94a3b8]">
+            You need to enroll in this course to access the lessons.
+          </p>
+          <Link
+            href={`/courses/${courseId}/enroll`}
+            className="rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-6 py-2 text-sm font-semibold text-white"
+          >
+            Enroll Now
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const currentIndex = allLessons.findIndex((al) => al.lesson.id === lessonId);
   if (currentIndex === -1) notFound();
@@ -394,21 +602,7 @@ export default function LearnPage({
   const prevItem = allLessons[currentIndex - 1] ?? null;
   const nextItem = allLessons[currentIndex + 1] ?? null;
 
-  // Track completed (local state — use backend in production)
-  const [completed, setCompleted] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [bottomTab, setBottomTab] = useState<BottomTab>('notes');
-  const [progress, setProgress] = useState(0);
-
-  const markComplete = () => {
-    setCompleted((prev) => {
-      const next = new Set(prev);
-      next.add(lessonId);
-      return next;
-    });
-  };
-
-  const progressPercent = Math.round(((completed.size + 1) / allLessons.length) * 100);
+  const isCompleted = completed.has(lessonId);
 
   // Find which section contains current lesson for default-open
   const currentSectionId = currentSection.id;
@@ -459,8 +653,10 @@ export default function LearnPage({
               <VideoPlayer
                 url={videoUrl}
                 title={currentLesson.title}
-                onEnded={markComplete}
-                onProgress={(p) => setProgress(Math.round(p * 100))}
+                onProgress={(p) => {
+                  setVideoProgress(p);
+                  setProgress(Math.round(p * 100));
+                }}
               />
             </div>
           </div>
@@ -484,6 +680,12 @@ export default function LearnPage({
                       {course.instructor.name}
                     </span>
                     <span>{progress}% watched</span>
+                    {isCompleted && (
+                      <span className="flex items-center gap-1 text-xs text-[#ff8c00]">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Completed
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -499,18 +701,16 @@ export default function LearnPage({
                     </Link>
                   )}
 
-                  {/* Mark complete */}
-                  <button
-                    onClick={markComplete}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
-                      completed.has(lessonId)
-                        ? 'bg-[#ff8c00]/15 text-[#ff8c00]'
-                        : 'border border-[#ff8c00] text-[#ff8c00] hover:bg-[#ff8c00] hover:text-white'
-                    }`}
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    {completed.has(lessonId) ? 'Completed' : 'Mark Complete'}
-                  </button>
+                  {/* Certificate download when 100% complete */}
+                  {progressPercent === 100 && certificate && (
+                    <button
+                      onClick={() => setShowCertificate(true)}
+                      className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-3 py-2 text-xs font-semibold text-white transition-all hover:shadow-md hover:shadow-[#ff8c00]/20"
+                    >
+                      <Award className="h-3.5 w-3.5" />
+                      Download Certificate
+                    </button>
+                  )}
 
                   {/* Next */}
                   {nextItem && (
@@ -573,6 +773,16 @@ export default function LearnPage({
                 </div>
                 <span className="text-xs font-bold text-[#ff8c00]">{progressPercent}%</span>
               </div>
+              {/* Certificate download when 100% complete */}
+              {progressPercent === 100 && certificate && (
+                <button
+                  onClick={() => setShowCertificate(true)}
+                  className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-3 py-2 text-xs font-semibold text-white transition-all hover:shadow-md"
+                >
+                  <Award className="h-4 w-4" />
+                  Download Certificate
+                </button>
+              )}
               {/* Next lesson */}
               {nextItem && (
                 <Link
@@ -587,7 +797,7 @@ export default function LearnPage({
 
             {/* Lesson list */}
             <div className="flex-1 divide-y divide-[#e0e0e0] dark:divide-[#1f1f1f]">
-              {course.curriculum.map((section) => (
+              {course.curriculum.map((section: Section) => (
                 <SidebarSection
                   key={section.id}
                   section={section}
@@ -599,6 +809,54 @@ export default function LearnPage({
               ))}
             </div>
           </aside>
+        )}
+
+        {/* Certificate Modal */}
+        {showCertificate && certificate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="relative w-full max-w-md rounded-xl bg-white p-8 dark:bg-[#111111]">
+              <button
+                onClick={() => setShowCertificate(false)}
+                className="absolute right-4 top-4 text-[#666666] hover:text-[#ff8c00] dark:text-[#94a3b8]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#ff8c00]/10">
+                  <Award className="h-8 w-8 text-[#ff8c00]" />
+                </div>
+                <h2 className="mb-2 text-xl font-bold text-[#1a1a1a] dark:text-[#f1f5f9]">Certificate Earned!</h2>
+                <p className="mb-4 text-sm text-[#666666] dark:text-[#94a3b8]">
+                  Congratulations on completing <strong>{course.title}</strong>
+                </p>
+                <p className="mb-6 text-xs text-[#999] dark:text-[#64748b]">
+                  Certificate ID: {certificate.certificateId} · Issued: {new Date(certificate.issuedAt).toLocaleDateString()}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      // Trigger certificate download
+                      fetch(`/api/courses/${courseId}/certificate/download`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ certificateId: certificate.certificateId }),
+                      });
+                    }}
+                    className="flex-1 rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    <Download className="h-4 w-4 inline mr-1" />
+                    Download PDF
+                  </button>
+                  <button
+                    onClick={() => setShowCertificate(false)}
+                    className="flex-1 rounded-lg border border-[#e0e0e0] px-4 py-2 text-sm font-semibold text-[#666666] hover:border-[#ff8c00] hover:text-[#ff8c00] dark:border-[#1f1f1f]"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

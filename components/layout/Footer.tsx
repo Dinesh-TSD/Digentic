@@ -41,7 +41,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-orange-600 transition-all hover:border-orange-600 hover:shadow-[0_0_12px_rgba(255,140,0,0.3)]"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-[#0ea5e9] transition-all hover:border-[#38bdf8] hover:shadow-[0_0_12px_rgba(14,165,233,0.25)]"
                 >
                   <social.icon className="h-5 w-5" />
                 </a>
@@ -52,7 +52,7 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div key={heading}>
-              <h4 className="mb-3 text-sm font-semibold text-orange-gradient">
+              <h4 className="mb-3 text-sm font-semibold bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#2563eb] bg-clip-text text-transparent">
                 {heading}
               </h4>
               <ul className="space-y-2">
@@ -60,7 +60,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-orange-600"
+                      className="text-sm text-muted-foreground transition-colors hover:text-[#0ea5e9]"
                     >
                       {link.label}
                     </Link>
@@ -74,7 +74,7 @@ export function Footer() {
         {/* Newsletter mini-form */}
         <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-orange-gradient">
+            <h4 className="text-sm font-semibold bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#2563eb] bg-clip-text text-transparent">
               Newsletter
             </h4>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -87,11 +87,11 @@ export function Footer() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="h-10 w-full max-w-xs rounded-lg border border-border bg-[var(--bg-surface)] px-4 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-orange-600"
+              className="h-10 w-full max-w-xs rounded-lg border border-border bg-[var(--bg-surface)] px-4 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-[#38bdf8]"
             />
             <button
               type="submit"
-              className="whitespace-nowrap rounded-lg bg-orange-gradient px-5 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-600/30"
+              className="whitespace-nowrap rounded-lg bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
               {subscribed ? 'Subscribed!' : 'Subscribe'}
             </button>
@@ -105,7 +105,7 @@ export function Footer() {
             reserved.
           </p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            Made with <Heart className="h-3 w-3 text-orange-600" fill="currentColor" /> in Chennai, India
+            Made with <Heart className="h-3 w-3 text-[#0ea5e9]" fill="currentColor" /> in Chennai, India
           </p>
         </div>
       </div>

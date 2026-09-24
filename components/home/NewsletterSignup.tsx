@@ -34,8 +34,8 @@ export function NewsletterSignup() {
           transition={{ duration: 0.5 }}
           className="rounded-2xl border border-border bg-[var(--bg-surface)] p-8 text-center md:p-12"
         >
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-orange-600/10">
-            <Mail className="h-8 w-8 text-orange-600" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#e0f2fe]">
+            <Mail className="h-8 w-8 text-[#0ea5e9]" />
           </div>
           
           <SectionHeader
@@ -65,11 +65,11 @@ export function NewsletterSignup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="h-12 flex-1 rounded-lg border border-border bg-[var(--bg-base)] px-4 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-orange-600"
+              className="h-12 flex-1 rounded-lg border border-border bg-[var(--bg-base)] px-4 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-[#38bdf8]"
             />
             <button
               type="submit"
-              className="h-12 whitespace-nowrap rounded-lg bg-orange-gradient px-8 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-600/30"
+              className="h-12 whitespace-nowrap rounded-lg bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#2563eb] px-8 text-sm font-semibold text-white transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
             >
               {submitted ? (
                 <span className="flex items-center gap-1">

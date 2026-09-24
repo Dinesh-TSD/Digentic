@@ -4,6 +4,12 @@ import { CourseProgress } from '@/lib/models/course.model';
 import { Course } from '@/lib/models/course.model';
 import { auth } from '@/auth';
 
+async function getUserId(session: any): string | null {
+  // For credentials users: session.user._id
+  // For OAuth users: session.user.id (set in jwt callback)
+  return session?.user?._id || session?.user?.id || null;
+}
+
 // Helper to get all lesson IDs from a course
 async function getAllLessonIds(courseId: string): Promise<string[]> {
   const course = await Course.findOne({ id: courseId }).lean();
@@ -31,7 +37,8 @@ export async function GET(
     const { id: courseId } = await params;
     const session = await auth();
 
-    if (!session?.user?._id) {
+    const userId = getUserId(session);
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -39,7 +46,7 @@ export async function GET(
     }
 
     const progress = await CourseProgress.findOne({
-      userId: session.user._id,
+      userId,
       courseId,
     }).lean();
 
@@ -97,7 +104,8 @@ export async function POST(
     const body = await request.json();
     const { lessonId, isComplete = true } = body;
 
-    if (!session?.user?._id) {
+    const userId = getUserId(session);
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -108,13 +116,13 @@ export async function POST(
     
     // Find or create progress
     let progress = await CourseProgress.findOne({
-      userId: session.user._id,
+      userId,
       courseId,
     });
 
     if (!progress) {
       progress = new CourseProgress({
-        userId: session.user._id,
+        userId,
         courseId,
         completedLessons: [],
         startedAt: new Date(),

@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongoose';
 import { CourseProgress, Certificate, Course } from '@/lib/models/course.model';
 import { auth } from '@/auth';
-import { generateCertificatePDFServer } from '@/lib/services/certificate-service';
+
+async function getUserId(session: any): string | null {
+  return session?.user?._id || session?.user?.id || null;
+}
 
 // Helper to check if user has completed the course
 async function isCourseCompleted(userId: string, courseId: string): Promise<boolean> {
@@ -41,7 +44,8 @@ export async function GET(
     const { id: courseId } = await params;
     const session = await auth();
 
-    if (!session?.user?.id) {
+    const userId = getUserId(session);
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -49,7 +53,7 @@ export async function GET(
     }
 
     // Check if course is completed
-    const isCompleted = await isCourseCompleted(String(session.user.id), courseId);
+    const isCompleted = await isCourseCompleted(String(userId), courseId);
     
     if (!isCompleted) {
       return NextResponse.json(
@@ -60,7 +64,7 @@ export async function GET(
 
     // Check if certificate already exists
     let certificate = await Certificate.findOne({
-      userId: session.user.id,
+      userId,
       courseId,
     });
 
@@ -77,10 +81,10 @@ export async function GET(
       const certificateId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       
       certificate = new Certificate({
-        userId: session.user.id,
+        userId,
         courseId,
         courseTitle: course.title,
-        userName: session.user.name || String(session.user.id),
+        userName: session.user.name || String(userId),
         certificateId,
         issuedAt: new Date(),
         isDownloaded: false,
@@ -130,14 +134,15 @@ export async function POST(
     const { id: courseId } = await params;
     const session = await auth();
 
-    if (!session?.user?._id) {
+    const userId = getUserId(session);
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const isCompleted = await isCourseCompleted(String(session.user._id), courseId);
+    const isCompleted = await isCourseCompleted(String(userId), courseId);
     
     if (!isCompleted) {
       return NextResponse.json({
@@ -149,7 +154,7 @@ export async function POST(
 
     // Check if certificate exists
     const certificate = await Certificate.findOne({
-      userId: session.user._id,
+      userId,
       courseId,
     });
 

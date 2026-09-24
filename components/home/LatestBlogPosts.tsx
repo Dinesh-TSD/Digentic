@@ -76,7 +76,7 @@ export function LatestBlogPosts() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="card-hover group overflow-hidden rounded-xl border border-border bg-[var(--bg-surface)]"
               >
-                <Link href={`/blog/${post.slug}`} className="relative block h-48 w-full overflow-hidden bg-orange-600/10">
+                <Link href={`/blog/${post.slug}`} className="relative block h-48 w-full overflow-hidden bg-[#e0f2fe]">
                   {post.image ? (
                     <Image
                       src={post.image}
@@ -85,19 +85,19 @@ export function LatestBlogPosts() {
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-orange-600/5">
+                    <div className="flex h-full w-full items-center justify-center bg-[#e0f2fe]">
                       <span className="text-3xl">📝</span>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
-                  <span className="absolute left-3 top-3 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+                  <span className="absolute left-3 top-3 rounded-md bg-[#0ea5e9] px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
                     {post.category}
                   </span>
                 </Link>
 
                 <div className="p-5">
                   <Link href={`/blog/${post.slug}`}>
-                    <h3 className="text-base font-bold text-[var(--text-primary)] transition-colors group-hover:text-orange-600 line-clamp-2">
+                    <h3 className="text-base font-bold text-[var(--text-primary)] transition-colors group-hover:text-[#0ea5e9] line-clamp-2">
                       {post.title}
                     </h3>
                   </Link>
@@ -107,13 +107,13 @@ export function LatestBlogPosts() {
                   <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
                     {post.publishDate && (
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5 text-orange-600" />
+                        <Calendar className="h-3.5 w-3.5 text-[#0ea5e9]" />
                         {post.publishDate}
                       </span>
                     )}
                     {post.readTime && (
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5 text-orange-600" />
+                        <Clock className="h-3.5 w-3.5 text-[#0ea5e9]" />
                         {post.readTime}
                       </span>
                     )}
@@ -131,7 +131,7 @@ export function LatestBlogPosts() {
         <div className="mt-8 text-center">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-orange-gradient hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[#0ea5e9] hover:underline"
           >
             Read All Posts
             <ArrowRight className="h-4 w-4" />
