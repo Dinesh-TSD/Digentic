@@ -67,17 +67,24 @@ export const authConfig = {
         }
       }
       if (trigger === 'update' && session) {
-        if (session.role) {
-          token.role = String(session.role);
+        const updateSession = session as any;
+        const updateRole = updateSession.role ?? updateSession.user?.role;
+        const updateEnrolledCourses =
+          updateSession.enrolledCourses ?? updateSession.user?.enrolledCourses;
+        const updatePurchasedDigital =
+          updateSession.purchasedDigital ?? updateSession.user?.purchasedDigital;
+
+        if (updateRole) {
+          token.role = String(updateRole);
         }
-        if (session.enrolledCourses) {
-          token.enrolledCourses = Array.isArray(session.enrolledCourses)
-            ? Array.from(session.enrolledCourses).map((c) => String(c))
+        if (updateEnrolledCourses) {
+          token.enrolledCourses = Array.isArray(updateEnrolledCourses)
+            ? Array.from(updateEnrolledCourses).map((c) => String(c))
             : [];
         }
-        if (session.purchasedDigital) {
-          token.purchasedDigital = Array.isArray(session.purchasedDigital)
-            ? Array.from(session.purchasedDigital).map((d) => String(d))
+        if (updatePurchasedDigital) {
+          token.purchasedDigital = Array.isArray(updatePurchasedDigital)
+            ? Array.from(updatePurchasedDigital).map((d) => String(d))
             : [];
         }
       }

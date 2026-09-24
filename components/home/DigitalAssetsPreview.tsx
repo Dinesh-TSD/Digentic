@@ -34,7 +34,7 @@ export function DigitalAssetsPreview() {
                   fill
                   className="object-cover"
                 />
-                <span className="absolute left-3 top-3 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white">
+                <span className="absolute left-3 top-3 rounded-md bg-[#0ea5e9] px-2.5 py-1 text-xs font-semibold text-white">
                   {asset.type}
                 </span>
               </div>
@@ -43,7 +43,7 @@ export function DigitalAssetsPreview() {
                   {asset.title}
                 </h3>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-lg font-bold text-orange-600">
+                  <span className="text-lg font-bold text-[#0369a1]">
                     ₹{asset.price}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -51,7 +51,7 @@ export function DigitalAssetsPreview() {
                     {asset.downloads} downloads
                   </span>
                 </div>
-                <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-gradient py-2 text-xs font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-600/20">
+                <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#2563eb] py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/30">
                   <ShoppingBag className="h-3.5 w-3.5" />
                   Get Now
                 </button>
@@ -63,7 +63,7 @@ export function DigitalAssetsPreview() {
         <div className="mt-8 text-center">
           <Link
             href="/digital"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-orange-gradient hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[#0ea5e9] hover:underline"
           >
             Shop Now
             <ArrowRight className="h-4 w-4" />

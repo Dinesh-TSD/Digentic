@@ -11,6 +11,7 @@ import {
   Award,
   ExternalLink,
   Github,
+  Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -42,22 +43,60 @@ export default function AboutPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center text-center"
+          className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 py-12 lg:py-20"
         >
-          <div className="relative mb-6 h-40 w-40 overflow-hidden rounded-full border-4 border-orange-600/30">
-            <div className="flex h-full w-full items-center justify-center bg-orange-gradient">
-              <span className="text-5xl font-bold text-white">DT</span>
+          {/* Left Content */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-orange-600/30 bg-orange-600/10 px-4 py-1.5 text-sm text-orange-600 mb-6 lg:mb-4">
+              <MapPin className="h-4 w-4" />
+              Chennai, India
+            </div>
+            <h1 className="text-4xl font-bold md:text-5xl lg:text-6xl leading-tight">
+              <span className="text-orange-gradient">Dinesh T</span>
+            </h1>
+            <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
+              AI Engineer + MERN Developer
+            </p>
+            <p className="mt-6 text-base text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Building intelligent systems and scalable web applications. Passionate about
+              AI/ML, full-stack development, and creating impactful digital experiences.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-gradient px-6 py-3 text-base font-bold text-white shadow-lg shadow-orange-600/20 transition-all hover:shadow-xl hover:shadow-orange-600/30"
+              >
+                <Download className="h-5 w-5" />
+                Download Resume
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-orange-600 px-6 py-3 text-base font-semibold text-orange-600 transition-all hover:bg-orange-600 hover:text-white"
+              >
+                <Github className="h-5 w-5" />
+                GitHub
+              </a>
             </div>
           </div>
-          <h1 className="text-4xl font-bold md:text-5xl">
-            <span className="text-orange-gradient">Dinesh T</span>
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            AI Engineer + MERN Developer
-          </p>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-orange-600/30 bg-orange-600/10 px-4 py-1.5 text-sm text-orange-600">
-            <MapPin className="h-4 w-4" />
-            Chennai, India
+
+          {/* Right Visual */}
+          <div className="flex-1 flex items-center justify-center relative">
+            <div className="relative h-80 w-80 lg:h-96 lg:w-96">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 via-transparent to-purple-500/20 blur-2xl" />
+              <div className="relative h-full w-full rounded-full border-4 border-orange-600/30 overflow-hidden bg-gradient-to-br from-orange-500/10 to-purple-500/10">
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-7xl lg:text-9xl font-bold text-orange-600/30">DT</span>
+                </div>
+              </div>
+              <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-orange-gradient flex items-center justify-center shadow-lg">
+                <Sparkles className="h-10 w-10 text-white" />
+              </div>
+              <div className="absolute -top-4 -left-4 h-16 w-16 rounded-full bg-purple-600/20 flex items-center justify-center">
+                <Code className="h-8 w-8 text-purple-600" />
+              </div>
+            </div>
           </div>
         </motion.div>
       </section>

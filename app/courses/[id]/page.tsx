@@ -2,6 +2,8 @@
 
 import { notFound } from 'next/navigation';
 import { use, useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -325,7 +327,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
               {/* CTA */}
               <Link
-                href={`/courses/${course.id}/learn/${course.curriculum[0]?.lessons[0]?.id ?? '1'}`}
+                href={`/courses/${course.id}/enroll`}
                 className="mb-3 rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-8 py-3 text-center text-sm font-bold text-white shadow-lg shadow-[#ff8c00]/20 transition-all hover:shadow-xl hover:shadow-[#ff8c00]/30"
               >
                 Enroll Now →
@@ -565,7 +567,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
                   {/* Enroll CTA */}
                   <Link
-                    href={`/courses/${course.id}/learn/${course.curriculum[0]?.lessons[0]?.id ?? '1'}`}
+                    href={`/courses/${course.id}/enroll`}
                     className="mb-3 block rounded-lg bg-gradient-to-r from-[#ff8c00] to-[#ff6b35] px-6 py-3 text-center text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-[#ff8c00]/20"
                   >
                     Enroll Now →

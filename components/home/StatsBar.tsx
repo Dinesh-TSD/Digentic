@@ -52,13 +52,13 @@ export function StatsBar() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex items-center gap-4 rounded-lg border-l-4 border-orange-600 bg-[var(--bg-base)] p-4 shadow-sm"
+              className="flex items-center gap-4 rounded-lg border-l-4 border-[#38bdf8] bg-[var(--bg-base)] p-4 shadow-sm"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-orange-600/10">
-                <Icon className="h-6 w-6 text-orange-600" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#e0f2fe]">
+                <Icon className="h-6 w-6 text-[#0ea5e9]" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-gradient">
+                <div className="text-2xl font-bold text-[#0ea5e9]">
                   <CountUp target={stat.value} />
                 </div>
                 <div className="text-xs text-muted-foreground sm:text-sm">

@@ -46,7 +46,7 @@ export function Testimonials() {
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star
                         key={i}
-                        className="h-4 w-4 text-orange-600"
+                        className="h-4 w-4 text-[#0ea5e9]"
                         fill="currentColor"
                       />
                     ))}
@@ -85,7 +85,7 @@ export function Testimonials() {
               key={i}
               onClick={() => setIndex(i)}
               className={`h-2 rounded-full transition-all ${
-                i === index ? 'w-8 bg-orange-600' : 'w-2 bg-border'
+                i === index ? 'w-8 bg-[#0ea5e9]' : 'w-2 bg-border'
               }`}
             />
           ))}

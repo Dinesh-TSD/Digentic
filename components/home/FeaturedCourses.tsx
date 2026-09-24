@@ -34,7 +34,7 @@ export function FeaturedCourses() {
                   fill
                   className="object-cover"
                 />
-                <span className="absolute left-3 top-3 rounded-md bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white">
+                <span className="absolute left-3 top-3 rounded-md bg-[#0ea5e9] px-2.5 py-1 text-xs font-semibold text-white">
                   {course.level}
                 </span>
               </div>
@@ -52,17 +52,17 @@ export function FeaturedCourses() {
                       {course.lessons} lessons
                     </span>
                     <span className="flex items-center gap-1">
-                      <Star className="h-3.5 w-3.5 text-orange-600" fill="currentColor" />
+                      <Star className="h-3.5 w-3.5 text-[#0ea5e9]" fill="currentColor" />
                       {course.rating}
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-orange-600">
+                  <span className="text-lg font-bold text-[#0369a1]">
                     ₹{course.price}
                   </span>
                 </div>
                 <Link
                   href="/courses"
-                  className="mt-4 flex items-center justify-center gap-1.5 rounded-lg border border-orange-600 py-2 text-xs font-semibold text-orange-600 transition-all hover:bg-orange-600 hover:text-white"
+                  className="mt-4 flex items-center justify-center gap-1.5 rounded-lg border border-[#38bdf8] py-2 text-xs font-semibold text-[#0369a1] transition-all hover:bg-[#38bdf8] hover:text-white"
                 >
                   <Play className="h-3.5 w-3.5" />
                   Enroll Now
@@ -75,7 +75,7 @@ export function FeaturedCourses() {
         <div className="mt-8 text-center">
           <Link
             href="/courses"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-orange-gradient hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[#0ea5e9] hover:underline"
           >
             Browse Courses
             <ArrowRight className="h-4 w-4" />
